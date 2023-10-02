@@ -1,0 +1,96 @@
+﻿.modal-dialog {
+    z-index: 9999;
+    color: white;
+    position: fixed;
+    top: 0px;
+    left: 0px;
+    width: 100vw;
+    height: 100vh;
+    transition: background-color 0.25s;
+    background-color: rgba(0,0,0,0.25);
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    align-content: center;
+    justify-content: center;
+    pointer-events: unset !important;
+    display: flex;
+}
+
+.register-dialog {
+    border: 1px solid #282d33;
+    margin: 0px auto;
+    width: 400px;
+    height: auto;
+    background-color: rgb(40,40,40);
+    padding: 25px;
+}
+
+@media (max-width: 600px) {
+    .register-dialog {
+        width: 100%;
+        height: 100%;
+        box-shadow: inset 0px 0px 15px rgba(0,0,0,0.3);
+    }
+}
+
+.register-dialog h1 {
+    user-select: none;
+    text-align: center;
+    font-size: 14pt;
+    text-shadow: 0px 0px 2px rgba(0,0,0, 0.85);
+    margin: 0px;
+    padding: 0px;
+}
+
+.register-dialog hr {
+    margin: 10px 0px 15px 0px;
+    padding: 0px;
+}
+
+.register-dialog .fields {
+    padding: 0px;
+}
+
+.register-dialog label {
+    user-select: none;
+    margin: 12px;
+    margin-bottom: 2px;
+    display: block;
+    font-weight: 600;
+    text-shadow: 0px 0px 2px rgba(0,0,0, 0.85);
+}
+
+.register-dialog input {
+    display: block;
+    width: 100%;
+}
+
+.register-dialog .register-submit {
+    margin: 10px 0px 0px 0px;
+    width: 100px;
+    float: right;
+    border: none;
+    background-color: rgba(0,0,0,0);
+    font-weight: 600;
+    color: white;
+    border: 2px solid white;
+}
+
+.register-dialog .register-submit:hover {
+    background-color: white;
+    color: black;
+}
+
+.register-dialog .register-submit:active {
+    background-color: black;
+    color: white;
+}
+
+.disclaimer-text {
+    padding: 10px;
+    margin: 0px;
+    margin-top: 5px;
+    text-align: justify;
+    color: rgb(191, 193, 196);
+}
