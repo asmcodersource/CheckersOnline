@@ -9,7 +9,6 @@ export class NewGame extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            state: "select_game_type",
             loadingAnimation: ""
         }
         this.animationHandler = this.animationHandler.bind(this);
@@ -17,7 +16,8 @@ export class NewGame extends Component {
     }
 
     render() {
-        if (this.state.state == "select_game_type") {
+        let state = this.props.isRoomCreated ? "waiting_for_opponent" : "select_game_type";
+        if (state === "select_game_type") {
             return (
                 <div className="new-game">
                     <h1>New game</h1>
@@ -25,16 +25,16 @@ export class NewGame extends Component {
                     <div className="game-type-wrapper">
                         <div className="game-type">
                             <img src={humansPicture}></img>
-                            <div className="button">Play with human</div>
+                            <div onClick={this.props.playWithHumanHandler} className="button">Play with human</div>
                         </div>
                         <div className="game-type">
                             <img src={botPicture}></img>
-                            <div className="button">Play with bot</div>
+                            <div onClick={this.props.playWithBotHandler} className="button">Play with bot</div>
                         </div>
                     </div>
                 </div>
             )
-        } else if (this.state.state == "waiting_for_opponent") {
+        } else if (state === "waiting_for_opponent") {
             return (
                 <div className="new-game">
                     <h1>New game</h1>
@@ -42,7 +42,7 @@ export class NewGame extends Component {
                     <div className="game-opponent-waiting-wrapper">
                         <label>Waiting for opponent{this.state.loadingAnimation}</label>
                     </div>
-                    <button onClick={this.submitClickedHandler}>Cancel</button>
+                    <button onClick={this.props.cancelClickedHandler} className="button">Cancel</button>
                 </div>
             )
         }

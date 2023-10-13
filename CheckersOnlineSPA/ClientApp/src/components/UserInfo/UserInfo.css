@@ -11,7 +11,7 @@
     flex-grow: 1;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
     .user-info {
         width: 100%;
         height: fit-content;

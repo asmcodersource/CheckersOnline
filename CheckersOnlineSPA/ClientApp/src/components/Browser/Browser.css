@@ -49,9 +49,10 @@
 }
 
 
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
     .browser-wrapper {
         width: 100%;
+        max-width: 100%;
     }
 
     .browser-header span {

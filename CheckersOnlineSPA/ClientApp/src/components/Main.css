@@ -24,7 +24,7 @@
     flex-grow: 100;
 }
 
-@media (max-width: 800px) {
+@media (max-width: 1000px) {
     .main-container {
         margin-top: 20px;
         margin-bottom: 20px;

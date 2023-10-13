@@ -13,7 +13,7 @@ namespace CheckersOnlineSPA.Services.OnlineClientsWatcher
         private readonly RequestDelegate _next;
         private readonly Queue<ClientOnline> clientOnlines = new Queue<ClientOnline>();
         private readonly Dictionary<string, int> tokenCount = new Dictionary<string, int>();
-        private readonly TimeOnly ClientOnlineAliveTime = new TimeOnly(0, 1);
+        private readonly TimeOnly ClientOnlineAliveTime = new TimeOnly(0,0, 5);
         public int ClientsOnline { get => tokenCount.Count; }
 
         public OnlineClientsWatcher(IDataProtectionProvider protectorProvider)

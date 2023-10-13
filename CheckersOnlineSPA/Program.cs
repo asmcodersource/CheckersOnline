@@ -8,6 +8,7 @@ using CheckersOnlineSPA.Services.Browser;
 using Microsoft.AspNetCore.WebSockets;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.WebHost.UseUrls("http://192.168.0.100:5124");
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -43,7 +44,10 @@ string conn = "Server=192.168.0.101;Database=checkers;Uid=dimon;Pwd=qwerty123123
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySql(conn, ServerVersion.AutoDetect(conn)));
 
 var app = builder.Build();
-app.UseCors("AllowAll");
+app.UseCors(x => x
+             .AllowAnyOrigin()
+             .AllowAnyMethod()
+             .AllowAnyHeader());
 app.UseStaticFiles();
 app.UseRouting();
 app.UseWebSockets();
@@ -58,6 +62,7 @@ app.MapPost("/statistic", ClientsActivity.GetClientsActivityHandler );
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");
-app.MapFallbackToFile("index.html"); ;
+app.MapFallbackToFile("index.html");
+
 app.Run();
 

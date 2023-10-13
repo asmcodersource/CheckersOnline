@@ -105,7 +105,10 @@ namespace CheckersOnlineSPA.Services.Browser
             List<Task> tasks = new List<Task>();
             var copy = socketsHandlers.ToList<BrowserSocketHandler>();
             foreach (var handler in copy)
-                tasks.Add(handler.SendResponseJson(sendObject));
+            {
+                if( handler != null )
+                    tasks.Add(handler.SendResponseJson(sendObject));
+            }
             await Task.WhenAll(tasks);
         }
     }
