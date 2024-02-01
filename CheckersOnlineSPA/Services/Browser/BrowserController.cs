@@ -7,15 +7,15 @@ namespace CheckersOnlineSPA.Services.Browser
     public class BrowserController
     {
         public int LastRoomId { get; protected set; } = 0;
-        protected List<BrowserSocketHandler> socketsHandlers = new List<BrowserSocketHandler>();
+        protected List<BrowserSocket> socketsHandlers = new List<BrowserSocket>();
         public Dictionary<string, GameRoom> gameRooms { get; protected set; } = new Dictionary<string, GameRoom>();
 
-        public void AddSocketHandler(BrowserSocketHandler browserSocketHandler)
+        public void AddSocket(BrowserSocket browserSocketHandler)
         {
             socketsHandlers.Add(browserSocketHandler);
         }
 
-        public async Task RemoveSocketHandler(BrowserSocketHandler browserSocketHandler)
+        public async Task RemoveSocket(BrowserSocket browserSocketHandler)
         {
             socketsHandlers.Remove(browserSocketHandler);
             var user = browserSocketHandler.User;
@@ -55,7 +55,7 @@ namespace CheckersOnlineSPA.Services.Browser
             }
         }
 
-        public async Task RequestHandler(BrowserSocketHandler socketHandler, JObject jsonObject )
+        public async Task RequestHandler(BrowserSocket socketHandler, JObject jsonObject )
         {
             string requestType = jsonObject["type"].ToString();
 
@@ -103,7 +103,7 @@ namespace CheckersOnlineSPA.Services.Browser
         protected async Task SendToEveryone(object sendObject)
         {
             List<Task> tasks = new List<Task>();
-            var copy = socketsHandlers.ToList<BrowserSocketHandler>();
+            var copy = socketsHandlers.ToList<BrowserSocket>();
             foreach (var handler in copy)
             {
                 if( handler != null )

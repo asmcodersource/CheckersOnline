@@ -12,16 +12,16 @@ using CheckersOnlineSPA.Data;
 
 namespace CheckersOnlineSPA.Services.Browser
 {
-    public class BrowserSocketHandler
+    public class BrowserSocket
     {
-        public event Action<BrowserSocketHandler> SocketOpened;
-        public event Action<BrowserSocketHandler> SocketClosed;
-        public event Action<BrowserSocketHandler, Newtonsoft.Json.Linq.JObject> RequestReceived;
+        public event Action<BrowserSocket> SocketOpened;
+        public event Action<BrowserSocket> SocketClosed;
+        public event Action<BrowserSocket, Newtonsoft.Json.Linq.JObject> RequestReceived;
         public BrowserController BrowserController { get; set; }
         public ClaimsPrincipal User { get; set; }
         WebSocket _socket;
 
-        public BrowserSocketHandler(HttpContext context, WebSocket socket, BrowserController browserController)
+        public BrowserSocket(HttpContext context, WebSocket socket, BrowserController browserController)
         {
             User = GetUser(context);
             _socket = socket;
