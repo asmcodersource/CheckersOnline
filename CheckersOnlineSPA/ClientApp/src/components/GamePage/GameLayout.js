@@ -6,9 +6,16 @@ import './GameLayout.css';
 export class GameLayout extends Component {
     constructor(props) {
         super(props);
+
         this.gameWebSocket = null;
         this.tryLoginByStoredToken = this.tryLoginByStoredToken.bind(this);
-        this.state = { user: null, games: [], isRoomCreated: false }
+        this.mouseClicked = this.mouseClicked.bind(this);
+        this.state = {
+            user: null, games: [],
+            isRoomCreated: false,
+            firstClickValues: {},
+            firstClick: true
+        }
         this.checkersFieldRef = React.createRef();
     }
 
@@ -18,7 +25,7 @@ export class GameLayout extends Component {
             <div className='game-layout'>
                 <div className="game-layout-wrapper">
                     <div className='menu-field-wrapper'>
-                        <CheckersField ref={this.checkersFieldRef} />
+                        <CheckersField ref={this.checkersFieldRef} mouseClicked={this.mouseClicked} />
                         <RightSideMenu />
                     </div>
                 </div>
@@ -41,6 +48,25 @@ export class GameLayout extends Component {
                     continue;
                 this.checkersFieldRef.current.createChecker({ type: 'Checker', position: { cellX: x, cellY: y }, color: 'White' });
             }
+        }
+    }
+
+
+    mouseClicked(row, column) {
+        if (this.state.firstClick == null) {
+            this.setState({ firstClick: { row, column } });
+        } else {
+            let firstClickValues = this.state.firstClick;
+            this.setState({ firstClick: null });
+            let secondClickValues = { row, column };
+
+            let jsonObject = JSON.stringify({
+                "type": "makeAction",
+                "firstPosition": firstClickValues,
+                "secondPosition": secondClickValues,
+            });
+
+            this.gameWebSocket.send(jsonObject);
         }
     }
 

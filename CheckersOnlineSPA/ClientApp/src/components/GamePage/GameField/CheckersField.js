@@ -30,12 +30,23 @@ export class CheckersField extends Component {
     render() {
         return (
             <div className="field-wrapper">
-                <div className="checker-field">{this.state.rows}</div>
+                <div className="checker-field" onClick={(e) => this.mouseClickEvent(e)}>{this.state.rows}</div>
                 {this.state.checkers.map((checker, index) => (
                     <Checker key={checker.key} {...checker} />
                 ))}
             </div>
         );
+    }
+
+
+    mouseClickEvent(event) {
+        const fieldRect = event.currentTarget.getBoundingClientRect();
+        const mouseX = event.clientX - fieldRect.left;
+        const mouseY = event.clientY - fieldRect.top;
+        const cellSize = fieldRect.width / 8;
+        const column = Math.floor(mouseX / cellSize);
+        const row = Math.floor(mouseY / cellSize);
+        this.props.mouseClicked(row, column);
     }
 
     createChecker(newChecker) {
