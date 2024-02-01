@@ -26,6 +26,11 @@ namespace CheckersOnlineSPA.Services.Browser
             {
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 await RegisterWebSocketHandler(context, webSocket);
+
+            } else
+            {
+                await _next(context);
+                return;
             }
         }
 

@@ -27,6 +27,10 @@ namespace CheckersOnlineSPA.Services.Games
             {
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 await RegisterWebSocketHandler(context, webSocket);
+            } else
+            {
+                await _next(context);
+                return;
             }
         }
 
@@ -34,6 +38,7 @@ namespace CheckersOnlineSPA.Services.Games
         {
             var handler = new GenericWebSocket(context, webSocket);
             handler.RequestReceived += HandleRequest;
+
             await Task.Yield();
             await handler.Handle();
         }
@@ -41,7 +46,7 @@ namespace CheckersOnlineSPA.Services.Games
         public void HandleRequest(GenericWebSocket socket, JObject requestJsonObject)
         {
             var game = _controller.GetUserActiveGame(socket.User);
-            game.ProcessRequest(socket, requestJsonObject);
+            game?.ProcessRequest(socket, requestJsonObject);
         }
     }
 }

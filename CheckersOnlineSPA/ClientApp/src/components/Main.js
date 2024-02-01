@@ -125,6 +125,7 @@ export class Main extends Component {
 
     async tryLoginByStoredToken() {
         const token = sessionStorage.getItem('token')
+        console.log(token);
         const response = await fetch("/tokenvalidation", {
             method: "POST",
             headers: {

@@ -5,23 +5,23 @@ namespace CheckersOnlineSPA.Services.Games
 {
     public class Game
     {
-        public ClaimsPrincipal FirstPlayerClaims { get; set; }
+        public String FirstPlayerEmail { get; set; }
         public GenericWebSocket? FirstPlayerSocket { get; set; }
-        public ClaimsPrincipal SecondPlayerClaims { get; set; }
+        public String SecondPlayerEmail { get; set; }
         public GenericWebSocket? SecondPlayerSocket { get; set; }
         public GameState CurrentGameState {  get; set; }
 
         public Game(ClaimsPrincipal firstPlayer, ClaimsPrincipal secondPlayer)
         {
-            this.FirstPlayerClaims = firstPlayer;
-            this.SecondPlayerClaims = secondPlayer;
+            this.FirstPlayerEmail = firstPlayer.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+            this.SecondPlayerEmail = secondPlayer.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
         }
 
         public void ProcessRequest(GenericWebSocket socket, JObject jsonObject)
         {
             switch (jsonObject["type"].ToString() )
             {
-                case "ConnectToRoom":
+                case "connectToRoom":
                     ConnectPlayer(socket, jsonObject);        
                     break;
             }   
@@ -29,9 +29,10 @@ namespace CheckersOnlineSPA.Services.Games
 
         protected void ConnectPlayer(GenericWebSocket socket, JObject jsonObject)
         {
-            if (FirstPlayerClaims == socket.User)
+            var email = socket.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+            if (FirstPlayerEmail == email)
                 FirstPlayerSocket = socket;
-            if( SecondPlayerClaims == socket.User)
+            if( SecondPlayerEmail == email)
                 SecondPlayerSocket = socket;
             if (FirstPlayerSocket != null && SecondPlayerSocket != null)
                 ChangeState(GameState.WHITE_TURN);
@@ -47,6 +48,7 @@ namespace CheckersOnlineSPA.Services.Games
 
         protected void ChangeState(GameState newState) {
             CurrentGameState = newState;
+            
         }
     }
 }
