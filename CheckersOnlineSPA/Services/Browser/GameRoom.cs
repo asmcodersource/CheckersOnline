@@ -5,14 +5,16 @@ namespace CheckersOnlineSPA.Services.Browser
     public record GameRoom
     {
         public int Id { get; set; }
+        public GenericWebSocket CreatorSocket;
         public ClaimsPrincipal ClientCreator { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
 
-        public GameRoom(int id, ClaimsPrincipal clientCreator, string title, string description)
+        public GameRoom(int id, ClaimsPrincipal clientCreator, GenericWebSocket creatorSocket, string title, string description)
         {
             Id = id;
             ClientCreator = clientCreator;
+            CreatorSocket = creatorSocket;
             Title = title;
             Description = description;
         }

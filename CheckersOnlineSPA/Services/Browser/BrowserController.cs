@@ -1,21 +1,29 @@
-﻿using Microsoft.AspNetCore.DataProtection;
+﻿using CheckersOnlineSPA.Services.Games;
+using Microsoft.AspNetCore.DataProtection;
 using Newtonsoft.Json.Linq;
 using System.Security.Claims;
 
 namespace CheckersOnlineSPA.Services.Browser
 {
+    // Spagetti monkey code... BUT IT WORKS!
     public class BrowserController
     {
         public int LastRoomId { get; protected set; } = 0;
-        protected List<BrowserSocket> socketsHandlers = new List<BrowserSocket>();
+        protected GamesController gamesController;
+        protected List<GenericWebSocket> socketsHandlers = new List<GenericWebSocket>();
         public Dictionary<string, GameRoom> gameRooms { get; protected set; } = new Dictionary<string, GameRoom>();
 
-        public void AddSocket(BrowserSocket browserSocketHandler)
+        public BrowserController(GamesController gamesController)
+        {
+            this.gamesController = gamesController;
+        }
+
+        public void AddSocket(GenericWebSocket browserSocketHandler)
         {
             socketsHandlers.Add(browserSocketHandler);
         }
 
-        public async Task RemoveSocket(BrowserSocket browserSocketHandler)
+        public async Task RemoveSocket(GenericWebSocket browserSocketHandler)
         {
             socketsHandlers.Remove(browserSocketHandler);
             var user = browserSocketHandler.User;
@@ -27,9 +35,9 @@ namespace CheckersOnlineSPA.Services.Browser
             }
         }
 
-        protected GameRoom? CreateRoom(ClaimsPrincipal clientCreator, string title, string description)
+        protected GameRoom? CreateRoom(ClaimsPrincipal clientCreator, string title, string description, GenericWebSocket browserSocket)
         {
-            GameRoom gameRoom = new GameRoom(LastRoomId, clientCreator, title, description);
+            GameRoom gameRoom = new GameRoom(LastRoomId, clientCreator, browserSocket, title, description);
             Claim claimId = clientCreator.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
             var id = claimId.Value;
             if (gameRooms.ContainsKey(id))
@@ -55,7 +63,42 @@ namespace CheckersOnlineSPA.Services.Browser
             }
         }
 
-        public async Task RequestHandler(BrowserSocket socketHandler, JObject jsonObject )
+        protected GameRoom? RemoveRoom(string roomId)
+        {
+            lock (this)
+            {
+                if (gameRooms.ContainsKey(roomId))
+                {
+                    var removedRoom = gameRooms[roomId];
+                    gameRooms.Remove(roomId);
+                    return removedRoom;
+                }
+                return null;
+            }
+        }
+
+        protected bool ClaimRoom(string roomId, ClaimsPrincipal claimUser, GenericWebSocket claimSocket)
+        {
+            lock (this)
+            {
+                if (gameRooms.ContainsKey(roomId) == false)
+                    return false;
+                Claim claimId = claimUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                var id = claimId.Value;
+                if (id == roomId)
+                    return false;
+                var room = RemoveRoom(roomId);
+                SendNotifyRoomRemoved(room);
+                var game = new Game(room.ClientCreator, claimUser);
+                gamesController.CreateGameRoom(game);
+                // notify that room has claimed for two of players
+                room.CreatorSocket.SendResponseJson(new { type="claimRoom", state="roomClaimed" });
+                claimSocket.SendResponseJson(new { type = "claimRoom", state = "roomClaimed" });
+                return true;
+            }
+        }
+
+        public async Task RequestHandler(GenericWebSocket socketHandler, JObject jsonObject )
         {
             string requestType = jsonObject["type"].ToString();
 
@@ -64,7 +107,7 @@ namespace CheckersOnlineSPA.Services.Browser
                 var user = socketHandler.User;
                 var title = jsonObject["data"]["title"].ToString();
                 var description = jsonObject["data"]["description"].ToString();
-                var gameRoom = CreateRoom(user, title, description);
+                var gameRoom = CreateRoom(user, title, description, socketHandler);
                 if( gameRoom != null )
                     await SendNotifyRoomCreated(gameRoom);
             } else if( requestType == "removeRoom" && socketHandler.User != null )
@@ -73,9 +116,14 @@ namespace CheckersOnlineSPA.Services.Browser
                 var gameRoom = RemoveRoom(user);
                 if (gameRoom != null)
                     await SendNotifyRoomRemoved(gameRoom);
-            } 
-            
-            if( requestType == "getAllRooms")
+            }
+            if (requestType == "claimRoom" && socketHandler.User != null)
+            {
+                var user = socketHandler.User;
+                string roomId = Convert.ToString(jsonObject["roomId"]);
+                ClaimRoom(roomId, user, socketHandler);
+            }
+            if ( requestType == "getAllRooms")
             {
                 List<object> roomsDTO = new List<object> { };
                 foreach( var room in  gameRooms )
@@ -103,7 +151,7 @@ namespace CheckersOnlineSPA.Services.Browser
         protected async Task SendToEveryone(object sendObject)
         {
             List<Task> tasks = new List<Task>();
-            var copy = socketsHandlers.ToList<BrowserSocket>();
+            var copy = socketsHandlers.ToList<GenericWebSocket>();
             foreach (var handler in copy)
             {
                 if( handler != null )

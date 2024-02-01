@@ -29,9 +29,9 @@ namespace CheckersOnlineSPA.Services.Browser
             }
         }
 
-        public async Task RegisterWebSocketHandler(HttpContext context, WebSocket webSocket)
+        public async Task RegisterWebSocketHandler(HttpContext context, System.Net.WebSockets.WebSocket webSocket)
         {
-            var handler = new BrowserSocket(context, webSocket, _controller);
+            var handler = new GenericWebSocket(context, webSocket);
             handler.SocketOpened += (socketHandler) => _controller.AddSocket(socketHandler);
             handler.SocketClosed += (socketHandler) => _controller.RemoveSocket(socketHandler);
             handler.RequestReceived += (socketHandler, requestObject) => _controller.RequestHandler(socketHandler, requestObject);

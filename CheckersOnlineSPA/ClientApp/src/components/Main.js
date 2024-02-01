@@ -1,17 +1,18 @@
 import React, { Component } from 'react';
-import { UserInfo } from './UserInfo/UserInfo.js'
-import { Login } from './Login/Login.js';
-import { Register } from './Register/Register.js';
-import { Browser } from './Browser/Browser.js'
-import { NewGame } from './NewGame/NewGame.js';
-import { CreateRoom } from './CreateRoom/CreateRoom.js';
+import { UserInfo } from './MainPage/UserInfo/UserInfo.js'
+import { Login } from './MainPage/Login/Login.js';
+import { Register } from './MainPage/Register/Register.js';
+import { Browser } from './MainPage/Browser/Browser.js'
+import { NewGame } from './MainPage/NewGame/NewGame.js';
+import { CreateRoom } from './MainPage/CreateRoom/CreateRoom.js';
+import { useNavigate } from "react-router-dom";
 import './Main.css'
 
 export class Main extends Component {
 
   constructor(props) {
       super(props)
-      this.browserWebsocker = null;
+      this.browserWebsocket = null;
       this.state = { user: null, games: [], isRoomCreated : false }
       this.loginFormRef = React.createRef();  
       this.registerFormRef = React.createRef();  
@@ -22,6 +23,7 @@ export class Main extends Component {
       this.logoutHandler = this.logoutHandler.bind(this);
       this.createRoom = this.createRoom.bind(this);
       this.removeRoom = this.removeRoom.bind(this);
+      this.claimRoom = this.claimRoom.bind(this);
   }
 
   render() {
@@ -39,7 +41,10 @@ export class Main extends Component {
                     logoutHandler={this.logoutHandler}
                 />
                 <div className="browser-newgame-wrapper">
-                    <Browser games={this.state.games} />
+                    <Browser
+                        games={this.state.games}
+                        claimRoom={this.claimRoom} 
+                    />
                     <NewGame
                         cancelClickedHandler={() => this.removeRoom() }
                         isRoomCreated={this.state.isRoomCreated}
@@ -61,7 +66,13 @@ export class Main extends Component {
         this.setState({ isRoomCreated: false });
         const data = { type: "removeRoom" };
         const jsonMessage = JSON.stringify(data);
-        await this.browserWebsocker.send(jsonMessage);
+        await this.browserWebsocket.send(jsonMessage);
+    }
+
+    async claimRoom(roomId) {
+        const data = { type: "claimRoom", roomId: roomId };
+        const jsonMessage = JSON.stringify(data);
+        await this.browserWebsocket.send(jsonMessage);
     }
 
 
@@ -69,25 +80,25 @@ export class Main extends Component {
         this.setState({ isRoomCreated: true });
         const data = { type: "createRoom", data: room };
         const jsonMessage = JSON.stringify(data);
-        await this.browserWebsocker.send(jsonMessage);
+        await this.browserWebsocket.send(jsonMessage);
     }
 
     async createBrowserWebsocket() {
         const token = sessionStorage.getItem('token')
-        if (this.browserWebsocker != null)
-            this.browserWebsocker.close();
+        if (this.browserWebsocket != null)
+            this.browserWebsocket.close();
 
 
         let target = 'ws://95.47.167.113:5124';
-        this.browserWebsocker = new WebSocket(`${target}/ws?token=${token}`);
-        this.browserWebsocker.onopen = async (event) => {
+        this.browserWebsocket = new WebSocket(`${target}/ws?token=${token}`);
+        this.browserWebsocket.onopen = async (event) => {
             await new Promise(resolve => setTimeout(resolve, 500));
 
             const data1 = { type: "getAllRooms" }
             const jsonMessage1 = JSON.stringify(data1);
-            await this.browserWebsocker.send(jsonMessage1);
+            await this.browserWebsocket.send(jsonMessage1);
         };
-        this.browserWebsocker.onmessage = (event) => {
+        this.browserWebsocket.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
                 if (message["type"] === "addRoom") {
@@ -101,6 +112,10 @@ export class Main extends Component {
                     var roomId = message["data"]["id"];
                     const rooms = this.state.games.filter((room) => room.id !== roomId);
                     this.setState({ games: rooms });
+                } else if (message["type"] === "claimRoom") {
+                    var state = message["state"];
+                    if (state === "roomClaimed")
+                        window.location.replace("/gameroom");
                 }
             } catch (err) {
                 console.log(err);
@@ -130,7 +145,7 @@ export class Main extends Component {
 
     logoutHandler() {
         this.removeRoom();
-        this.browserWebsocker.close();
+        this.browserWebsocket.close();
         sessionStorage.removeItem('token');
         this.setState({ user: null });
     }

@@ -1,0 +1,16 @@
+﻿.checker {
+
+}
+
+.checker > img {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+.checker-wrapper {
+    width: 64px;
+    height: 64px;
+    position: absolute;
+    transition: all 0.3s ease;
+    padding: 2px;
+}

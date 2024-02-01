@@ -10,22 +10,20 @@ using System.IdentityModel.Tokens.Jwt;
 using Microsoft.IdentityModel.Tokens;
 using CheckersOnlineSPA.Data;
 
-namespace CheckersOnlineSPA.Services.Browser
+namespace CheckersOnlineSPA.Services
 {
-    public class BrowserSocket
+    public class GenericWebSocket
     {
-        public event Action<BrowserSocket> SocketOpened;
-        public event Action<BrowserSocket> SocketClosed;
-        public event Action<BrowserSocket, Newtonsoft.Json.Linq.JObject> RequestReceived;
-        public BrowserController BrowserController { get; set; }
+        public event Action<GenericWebSocket> SocketOpened;
+        public event Action<GenericWebSocket> SocketClosed;
+        public event Action<GenericWebSocket, JObject> RequestReceived;
         public ClaimsPrincipal User { get; set; }
-        WebSocket _socket;
+        System.Net.WebSockets.WebSocket _socket;
 
-        public BrowserSocket(HttpContext context, WebSocket socket, BrowserController browserController)
+        public GenericWebSocket(HttpContext context, System.Net.WebSockets.WebSocket socket)
         {
             User = GetUser(context);
             _socket = socket;
-            BrowserController = browserController;
         }
 
         public ClaimsPrincipal GetUser(HttpContext context)
@@ -37,13 +35,14 @@ namespace CheckersOnlineSPA.Services.Browser
                 var validationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = CheckersOnlineSPA.ClientApp.Auth.AuthOptions.GetSymmetricSecurityKey(), // Replace with your key
+                    IssuerSigningKey = ClientApp.Auth.AuthOptions.GetSymmetricSecurityKey(), // Replace with your key
                     ValidateIssuer = false,
                     ValidateAudience = false,
                 };
 
                 return tokenHandler.ValidateToken(token, validationParameters, out _);
-            } catch (Exception ex)
+            }
+            catch (Exception ex)
             {
                 return null;
             }
@@ -71,8 +70,8 @@ namespace CheckersOnlineSPA.Services.Browser
                     await _socket.ReceiveAsync(receiveBuffer, CancellationToken.None);
                     await RequestHandler(receiveBuffer);
                 }
-            } 
-            catch (WebSocketException exception){}
+            }
+            catch (WebSocketException exception) { }
             finally
             {
                 SocketClosed?.Invoke(this);
@@ -87,8 +86,8 @@ namespace CheckersOnlineSPA.Services.Browser
             {
                 var jsonObject = JObject.Parse(requestString);
                 RequestReceived?.Invoke(this, jsonObject);
-            } 
-            catch ( JsonReaderException ex ) {}
+            }
+            catch (JsonReaderException ex) { }
         }
     }
 }

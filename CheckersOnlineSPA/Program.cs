@@ -6,6 +6,7 @@ using CheckersOnlineSPA.Data;
 using CheckersOnlineSPA.Services.OnlineClientsWatcher;
 using CheckersOnlineSPA.Services.Browser;
 using Microsoft.AspNetCore.WebSockets;
+using CheckersOnlineSPA.Services.Games;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://192.168.0.100:5124");
@@ -25,6 +26,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<BrowserController>();
 builder.Services.AddSingleton<OnlineClientsWatcher>();
+builder.Services.AddSingleton<GamesController>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -53,12 +55,17 @@ app.UseRouting();
 app.UseWebSockets();
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.UseMiddleware<BrowserMiddleware>();
 app.UseMiddleware<ClientsCounterMiddleware>();
+
 app.MapPost("/login", Auth.LoginHandler);
 app.MapPost("/registration", Auth.RegistrationHandle);
 app.MapPost("/tokenvalidation", Auth.TokenValidationHandler);
 app.MapPost("/statistic", ClientsActivity.GetClientsActivityHandler );
+
+
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller}/{action=Index}/{id?}");

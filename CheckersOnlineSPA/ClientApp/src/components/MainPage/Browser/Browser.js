@@ -17,7 +17,7 @@ export class Browser extends Component {
     }
 
     render() {
-        let games = this.props.games.map((game) => <Game key={"game=" + game.creatorId} {...game} />)
+        let games = this.props.games.map((game) => <Game key={"game=" + game.creatorId} {...game} claimRoom={this.props.claimRoom} />)
         return (
             <div className="browser-wrapper">
                 <div className="browser-header">

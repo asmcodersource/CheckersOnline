@@ -1,0 +1,8 @@
+﻿.right-menu-wrapper {
+    width: 350px;
+    height: auto;
+    background-color: rgb(39, 43, 51);
+    box-shadow: 15px 10px 15px rgba(0,0,0,0.15);
+    border: 3px solid #686a6e;
+    border-left: none;
+}
