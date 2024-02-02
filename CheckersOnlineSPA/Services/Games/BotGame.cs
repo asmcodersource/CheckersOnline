@@ -13,10 +13,12 @@ namespace CheckersOnlineSPA.Services.Games
         public CheckersEngine.GameEngine.Game? CheckersGame { get; set; }
         public FakeController? HumanFakeController { get; set; }
         public BotController? BotController { get; set; }
+        public GamesController GamesController { get; set; }
 
-        public BotGame(string humanPlayerEmail)
+        public BotGame(string humanPlayerEmail, GamesController gamesController)
         {
             this.HumanPlayerEmail = humanPlayerEmail;
+            this.GamesController = gamesController;
         }
 
         public void ProcessRequest(GenericWebSocket socket, JObject jsonObject)
@@ -49,10 +51,20 @@ namespace CheckersOnlineSPA.Services.Games
             {
                 HumanPlayerSocket = socket;
                 HumanFakeController = new FakeController(true);
-                BotController = new BotController(false);
+                BotController = new BotController(false, 7);
                 CheckersGame = new CheckersEngine.GameEngine.Game(BotController, HumanFakeController);
                 CheckersGame.InitializeGame();
                 ChangeState(GameState.WHITE_TURN);
+            }
+        }
+
+        public void PlayerDisconnected(GenericWebSocket socket)
+        {
+            var email = socket.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+            if (HumanPlayerEmail == email)
+            {
+                HumanPlayerSocket = null;
+                GamesController.CloseGameRoom(this);
             }
         }
 

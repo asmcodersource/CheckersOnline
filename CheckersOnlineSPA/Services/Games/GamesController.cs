@@ -7,7 +7,6 @@ namespace CheckersOnlineSPA.Services.Games
     public class GamesController
     {
         public List<IGame> ActiveGames { get; protected set; } = new List<IGame>();
-        public Dictionary<string, GenericWebSocket> connections { get; protected set; } = new Dictionary<string, GenericWebSocket>();
         public Dictionary<string, IGame> gameByFirstPlayer { get; protected set; } = new Dictionary<string, IGame>();
         public Dictionary<string, IGame> gameBySecondPlayer { get; protected set; } = new Dictionary<string, IGame>();
 
@@ -24,6 +23,21 @@ namespace CheckersOnlineSPA.Services.Games
                 gameByFirstPlayer.Add(botGame.HumanPlayerEmail, game);
             }
             return ActiveGames.Count - 1;
+        }
+
+        public void CloseGameRoom(IGame game)
+        {
+            ActiveGames.Remove(game);
+            switch (game)
+            {
+                case HumansGame humansGame:
+                    gameByFirstPlayer.Remove(humansGame.FirstPlayerEmail);
+                    gameByFirstPlayer.Remove(humansGame.SecondPlayerEmail);
+                    break;
+                case BotGame botGame:
+                    gameByFirstPlayer.Remove(botGame.HumanPlayerEmail);
+                    break;
+            };
         }
 
         public IGame? GetUserActiveGame(ClaimsPrincipal user)

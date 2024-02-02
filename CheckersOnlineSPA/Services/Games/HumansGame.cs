@@ -23,11 +23,13 @@ namespace CheckersOnlineSPA.Services.Games
         public CheckersEngine.GameEngine.Game? CheckersGame { get; set; }
         public FakeController? WhiteFakeController { get; set; }
         public FakeController? BlackFakeController { get; set; }
+        public GamesController GamesController { get; set; }
 
-        public HumansGame(ClaimsPrincipal firstPlayer, ClaimsPrincipal secondPlayer)
+        public HumansGame(ClaimsPrincipal firstPlayer, ClaimsPrincipal secondPlayer, GamesController gamesController)
         {
             this.FirstPlayerEmail = firstPlayer.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
             this.SecondPlayerEmail = secondPlayer.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+            GamesController = gamesController;
         }
 
         public void ProcessRequest(GenericWebSocket socket, JObject jsonObject)
@@ -130,6 +132,17 @@ namespace CheckersOnlineSPA.Services.Games
                 };
                 await SendToBothPlayers(removeAction);
             }
+        }
+
+        public void PlayerDisconnected(GenericWebSocket socket)
+        {
+            var email = socket.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+            if (FirstPlayerEmail == email)
+                FirstPlayerSocket = null;
+            if( SecondPlayerEmail == email) 
+                SecondPlayerSocket = null;
+            if (SecondPlayerSocket == null || FirstPlayerSocket == null)
+                GamesController.CloseGameRoom(this);
         }
 
         protected async Task SendToBothPlayers(object data)

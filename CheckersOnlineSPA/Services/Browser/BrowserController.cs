@@ -90,7 +90,7 @@ namespace CheckersOnlineSPA.Services.Browser
                     return false;
                 var room = RemoveRoom(roomId);
                 SendNotifyRoomRemoved(room);
-                var game = new HumansGame(room.ClientCreator, claimUser);
+                var game = new HumansGame(room.ClientCreator, claimUser, gamesController);
                 gamesController.CreateGameRoom(game);
                 // notify that room has claimed for two of players
                 room.CreatorSocket.SendResponseJson(new { type="claimRoom", state="roomClaimed" });
@@ -102,7 +102,7 @@ namespace CheckersOnlineSPA.Services.Browser
         protected bool CreateBotRoom(ClaimsPrincipal clientCreator, GenericWebSocket browserSocket)
         {
             string email = clientCreator.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
-            var game = new BotGame(email);
+            var game = new BotGame(email, gamesController);
             gamesController.CreateGameRoom(game);
             browserSocket.SendResponseJson(new { type = "claimRoom", state = "roomClaimed" });
             return true;

@@ -38,12 +38,27 @@ namespace CheckersOnlineSPA.Services.Games
         {
             var handler = new GenericWebSocket(context, webSocket);
             handler.RequestReceived += HandleRequest;
+            handler.SocketClosed += SocketClosedRequest;
 
             await Task.Yield();
             await handler.Handle();
         }
 
-        public void HandleRequest(GenericWebSocket socket, JObject requestJsonObject)
+        protected void SocketClosedRequest(GenericWebSocket socket)
+        {
+            var game = _controller.GetUserActiveGame(socket.User);
+            switch (game)
+            {
+                case HumansGame humansGame:
+                    humansGame.PlayerDisconnected(socket);
+                    break;
+                case BotGame botGame:
+                    botGame.PlayerDisconnected(socket);
+                    break;
+            }
+        }
+
+        protected void HandleRequest(GenericWebSocket socket, JObject requestJsonObject)
         {
             var game = _controller.GetUserActiveGame(socket.User);
             switch(game)
