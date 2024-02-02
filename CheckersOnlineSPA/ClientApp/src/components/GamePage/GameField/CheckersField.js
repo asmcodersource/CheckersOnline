@@ -58,8 +58,10 @@ export class CheckersField extends Component {
     removeChecker(position) {
         const cellX = position.cellX
         const cellY = position.cellY
-        const filteredCheckers = this.state.checkers.filter((checker) => !(checker.position.cellX == cellX && checker.position.cellY == cellY));
-        this.setState({ checkers: filteredCheckers })
+        this.setState(prevState => {
+            const filteredCheckers = prevState.checkers.filter(checker => !(checker.position.cellX === cellX && checker.position.cellY === cellY));
+            return { checkers: filteredCheckers };
+        });
     }
 
     moveChecker(currentPosition, newPosition) {

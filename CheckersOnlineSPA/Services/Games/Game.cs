@@ -87,7 +87,7 @@ namespace CheckersOnlineSPA.Services.Games
                 if (result == CheckersOnlineSPA.CheckersEngine.GameEngine.GameState.WrongActionProvided)
                     return;
 
-                SynchronizeAction(action);
+                await SynchronizeAction(action);
                 if ( CheckersOnlineSPA.CheckersEngine.GameEngine.GameState.WaitForNextStep == result)
                 {
                     CurrentGameState = CheckersGame.IsWhiteTurn ? GameState.WHITE_TURN : GameState.BLACK_TURN;
@@ -95,8 +95,9 @@ namespace CheckersOnlineSPA.Services.Games
             }
         }
 
-        protected void SynchronizeAction(CheckerAction checkerAction)
+        protected async Task SynchronizeAction(CheckerAction checkerAction)
         {
+
             var moveAction = new
             {
                 type = "moveAction",
@@ -111,7 +112,7 @@ namespace CheckersOnlineSPA.Services.Games
                     column = checkerAction.FieldEndPosition.X,
                 },
             };
-            SendToBothPlayers(moveAction);
+            await SendToBothPlayers(moveAction);
 
             if (checkerAction is CheckerBeatAction beatAction) {
                 var removeAction = new
@@ -123,16 +124,16 @@ namespace CheckersOnlineSPA.Services.Games
                         column = beatAction.CheckerRemovePosition.X,
                     }
                 };
-                SendToBothPlayers(removeAction);
+                await SendToBothPlayers(removeAction);
             }
         }
 
-        protected void SendToBothPlayers(object data)
+        protected async Task SendToBothPlayers(object data)
         {
             if (SecondPlayerSocket == null || FirstPlayerSocket == null)
                 throw new Exception("At least one of players is not initilized");
-            SecondPlayerSocket.SendResponseJson(data);
-            FirstPlayerSocket.SendResponseJson(data);
+            await SecondPlayerSocket.SendResponseJson(data);
+            await FirstPlayerSocket.SendResponseJson(data);
         }
 
         protected void ChangeState(GameState newState) {

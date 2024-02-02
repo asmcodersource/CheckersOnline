@@ -25,7 +25,7 @@ builder.Services.AddDataProtection();
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<BrowserController>();
-builder.Services.AddSingleton<OnlineClientsWatcher>();
+//builder.Services.AddSingleton<OnlineClientsWatcher>();
 builder.Services.AddSingleton<GamesController>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -58,7 +58,7 @@ app.UseAuthorization();
 
 app.UseMiddleware<GameMiddleware>();
 app.UseMiddleware<BrowserMiddleware>();
-app.UseMiddleware<ClientsCounterMiddleware>();
+//app.UseMiddleware<ClientsCounterMiddleware>();
 
 
 app.MapPost("/login", Auth.LoginHandler);

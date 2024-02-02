@@ -99,6 +99,7 @@ export class GameLayout extends Component {
         this.gameWebSocket.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
+                console.log(message);
                 if (message["type"] == "moveAction") {
                     let x1 = message["firstPosition"]["column"];
                     let y1 = message["firstPosition"]["row"];
