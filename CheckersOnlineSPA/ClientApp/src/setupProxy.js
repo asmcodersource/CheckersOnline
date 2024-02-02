@@ -18,7 +18,7 @@ const context = [
 module.exports = function (app) {
     const appProxy = createProxyMiddleware(context, {
         proxyTimeout: 10000,
-        target: 'http://192.168.0.100:5124',
+        target: target,
         secure: false,
         headers: {
             Connection: 'Keep-Alive'
