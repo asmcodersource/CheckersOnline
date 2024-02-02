@@ -14,7 +14,7 @@ export class GameLayout extends Component {
             user: null, games: [],
             isRoomCreated: false,
             firstClickValues: {},
-            firstClick: true
+            firstClick: null
         }
         this.checkersFieldRef = React.createRef();
     }
@@ -99,7 +99,17 @@ export class GameLayout extends Component {
         this.gameWebSocket.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
-                console.log(message);
+                if (message["type"] == "moveAction") {
+                    let x1 = message["firstPosition"]["column"];
+                    let y1 = message["firstPosition"]["row"];
+                    let x2 = message["secondPosition"]["column"];
+                    let y2 = message["secondPosition"]["row"];
+                    this.checkersFieldRef.current.moveChecker({ cellX: x1, cellY: y1 }, { cellX: x2, cellY: y2 })
+                } else if (message["type"] == "removeAction") {
+                    let x1 = message["removePosition"]["column"];
+                    let y1 = message["removePosition"]["row"];
+                    this.checkersFieldRef.current.removeChecker({ cellX: x1, cellY: y1 })
+                }
             } catch (err) {
                 console.log(err);
             }
