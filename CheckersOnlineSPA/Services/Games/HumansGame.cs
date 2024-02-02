@@ -9,7 +9,11 @@ using Mysqlx.Resultset;
 
 namespace CheckersOnlineSPA.Services.Games
 {
-    public class Game
+    /// <summary>
+    /// Represent game room of two humans
+    /// Used to handle and perform any requests from players
+    /// </summary>
+    public class HumansGame : IGame
     {
         public String FirstPlayerEmail { get; set; }
         public GenericWebSocket? FirstPlayerSocket { get; set; }
@@ -20,7 +24,7 @@ namespace CheckersOnlineSPA.Services.Games
         public FakeController? WhiteFakeController { get; set; }
         public FakeController? BlackFakeController { get; set; }
 
-        public Game(ClaimsPrincipal firstPlayer, ClaimsPrincipal secondPlayer)
+        public HumansGame(ClaimsPrincipal firstPlayer, ClaimsPrincipal secondPlayer)
         {
             this.FirstPlayerEmail = firstPlayer.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
             this.SecondPlayerEmail = secondPlayer.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
@@ -138,7 +142,6 @@ namespace CheckersOnlineSPA.Services.Games
 
         protected void ChangeState(GameState newState) {
             CurrentGameState = newState;
-            
         }
     }
 }

@@ -46,7 +46,16 @@ namespace CheckersOnlineSPA.Services.Games
         public void HandleRequest(GenericWebSocket socket, JObject requestJsonObject)
         {
             var game = _controller.GetUserActiveGame(socket.User);
-            game?.ProcessRequest(socket, requestJsonObject);
+            switch(game)
+            {
+                case HumansGame humansGame:
+                    humansGame?.ProcessRequest(socket, requestJsonObject);
+                    break;
+                case BotGame botGame:
+                    botGame?.ProcessRequest(socket, requestJsonObject);
+                    break;
+            }
+            
         }
     }
 }

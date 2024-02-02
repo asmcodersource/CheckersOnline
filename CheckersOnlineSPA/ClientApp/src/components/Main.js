@@ -19,6 +19,7 @@ export class Main extends Component {
       this.userInfoRef = React.createRef();
       this.browserRef = React.createRef();
       this.createRoomRef = React.createRef();
+      this.createBotRoomRef = this
       this.tryLoginByStoredToken = this.tryLoginByStoredToken.bind(this);
       this.logoutHandler = this.logoutHandler.bind(this);
       this.createRoom = this.createRoom.bind(this);
@@ -49,6 +50,7 @@ export class Main extends Component {
                         cancelClickedHandler={() => this.removeRoom() }
                         isRoomCreated={this.state.isRoomCreated}
                         playWithHumanHandler={() => this.createRoomRef.current.showDialog()}
+                        playWithBotHandler={() => this.createBotRoom()}
                     />
                 </div>
             </div>
@@ -79,6 +81,12 @@ export class Main extends Component {
     async createRoom(room) {
         this.setState({ isRoomCreated: true });
         const data = { type: "createRoom", data: room };
+        const jsonMessage = JSON.stringify(data);
+        await this.browserWebsocket.send(jsonMessage);
+    }
+
+    async createBotRoom() {
+        const data = { type: "createBotRoom" };
         const jsonMessage = JSON.stringify(data);
         await this.browserWebsocket.send(jsonMessage);
     }

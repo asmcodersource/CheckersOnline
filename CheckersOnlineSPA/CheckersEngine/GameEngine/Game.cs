@@ -24,6 +24,7 @@ namespace CheckersOnlineSPA.CheckersEngine.GameEngine
         public bool IsWhiteTurn { get; protected set; }
         public GameField GameField { get; protected set; }
         public AbstractScoreStorage ScoreStorage { get; protected set; }
+        public GameState LastGameState { get; protected set; }
 
         public Game(AbstractController blackController, AbstractController whiteController ) { 
             BlackController = blackController;
@@ -37,6 +38,7 @@ namespace CheckersOnlineSPA.CheckersEngine.GameEngine
             GameField = new GameField();
             GameField.InitializeField();
             ScoreStorage = new ScoreStorage();
+            LastGameState = GameState.WaitForNextStep; 
             //((ScoreStorage)(ScoreStorage)).LoadFromDatabase();
             ActionsExecutor = new ActionsExecutor(GameField, ScoreStorage);
             ActionsExecutor.RecountCheckersCount();
@@ -47,22 +49,30 @@ namespace CheckersOnlineSPA.CheckersEngine.GameEngine
             var controller = IsWhiteTurn ? WhiteController : BlackController;
             var (isHaveSteps, isHaveBeatSteps) = controller.IsControllerHavePossibleStep(GameField);
             if (isHaveSteps == false)
+            {
+                LastGameState = GameState.NoMoreStepsLeft;
                 return GameState.NoMoreStepsLeft;
+            }
             var action = await controller.GetAction(this, isHaveBeatSteps);
             if( isHaveBeatSteps )
             {
                 // Beating steps must be executed first
                 if (action is CheckerMoveAction)
+                {
+                    LastGameState = GameState.WrongActionMustBeat;
                     return GameState.WrongActionMustBeat;
+                }
             }
             if( action == null )
                 throw new NullReferenceException("Game controller actions is null");
             if (action.VerifyAction(GameField) == false)
             {
+                LastGameState = GameState.WrongActionProvided;
                 return GameState.WrongActionProvided;
             }
             if (ActionsExecutor.ExecuteAction(action))
                 IsWhiteTurn = !IsWhiteTurn;
+            LastGameState = GameState.WaitForNextStep;
             return GameState.WaitForNextStep;
         }
 
@@ -87,6 +97,13 @@ namespace CheckersOnlineSPA.CheckersEngine.GameEngine
         public void SwapController()
         {
             IsWhiteTurn = !IsWhiteTurn;
+        }
+
+        public CheckerAction? GetLastAction()
+        {
+            if( ActionsExecutor.ActionsHistory.Count > 0 )
+                return ActionsExecutor.ActionsHistory.Last();
+            return null;
         }
     }
 }

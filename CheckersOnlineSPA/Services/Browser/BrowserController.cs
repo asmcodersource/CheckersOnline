@@ -1,4 +1,5 @@
-﻿using CheckersOnlineSPA.Services.Games;
+﻿using CheckersOnlineSPA.Data;
+using CheckersOnlineSPA.Services.Games;
 using Microsoft.AspNetCore.DataProtection;
 using Newtonsoft.Json.Linq;
 using System.Security.Claims;
@@ -89,13 +90,22 @@ namespace CheckersOnlineSPA.Services.Browser
                     return false;
                 var room = RemoveRoom(roomId);
                 SendNotifyRoomRemoved(room);
-                var game = new Game(room.ClientCreator, claimUser);
+                var game = new HumansGame(room.ClientCreator, claimUser);
                 gamesController.CreateGameRoom(game);
                 // notify that room has claimed for two of players
                 room.CreatorSocket.SendResponseJson(new { type="claimRoom", state="roomClaimed" });
                 claimSocket.SendResponseJson(new { type = "claimRoom", state = "roomClaimed" });
                 return true;
             }
+        }
+
+        protected bool CreateBotRoom(ClaimsPrincipal clientCreator, GenericWebSocket browserSocket)
+        {
+            string email = clientCreator.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+            var game = new BotGame(email);
+            gamesController.CreateGameRoom(game);
+            browserSocket.SendResponseJson(new { type = "claimRoom", state = "roomClaimed" });
+            return true;
         }
 
         public async Task RequestHandler(GenericWebSocket socketHandler, JObject jsonObject )
@@ -110,7 +120,13 @@ namespace CheckersOnlineSPA.Services.Browser
                 var gameRoom = CreateRoom(user, title, description, socketHandler);
                 if( gameRoom != null )
                     await SendNotifyRoomCreated(gameRoom);
-            } else if( requestType == "removeRoom" && socketHandler.User != null )
+            }
+            else if (requestType == "createBotRoom" && socketHandler.User != null)
+            {
+                var user = socketHandler.User;
+                var gameRoom = CreateBotRoom(user, socketHandler);
+            }
+            else if( requestType == "removeRoom" && socketHandler.User != null )
             {
                 var user = socketHandler.User;
                 var gameRoom = RemoveRoom(user);

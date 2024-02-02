@@ -9,8 +9,8 @@
 
 .checker-wrapper {
     pointer-events: none;
-    width: 64px;
-    height: 64px;
+    width: 12.5%;
+    height: 12.5%;
     position: absolute;
     transition: all 0.3s ease;
     padding: 2px;
