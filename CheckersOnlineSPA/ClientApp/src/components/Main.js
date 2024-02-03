@@ -98,7 +98,7 @@ export class Main extends Component {
 
 
         let target = 'ws://95.47.167.113:5124';
-        this.browserWebsocket = new WebSocket(`${target}/ws?token=${token}`);
+        this.browserWebsocket = new WebSocket(`${target}/requestbrowsersocket?token=${token}`);
         this.browserWebsocket.onopen = async (event) => {
             await new Promise(resolve => setTimeout(resolve, 500));
 

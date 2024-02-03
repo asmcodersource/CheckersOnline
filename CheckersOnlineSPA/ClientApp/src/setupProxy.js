@@ -25,5 +25,21 @@ module.exports = function (app) {
         }
     });
 
+    app.use(
+        createProxyMiddleware('/requestbrowsersocket', {
+            target: webSocketTarget,
+            ws: true,
+            changeOrigin: true,
+        })
+    );
+
+    app.use(
+        createProxyMiddleware('/requestgamesocket', {
+            target: webSocketTarget,
+            ws: true,
+            changeOrigin: true,
+        })
+    );
+
     app.use(appProxy);
 };

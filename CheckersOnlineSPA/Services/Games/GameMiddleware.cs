@@ -27,7 +27,8 @@ namespace CheckersOnlineSPA.Services.Games
             {
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 await RegisterWebSocketHandler(context, webSocket);
-            } else
+            }
+            else
             {
                 await _next(context);
                 return;
@@ -61,7 +62,7 @@ namespace CheckersOnlineSPA.Services.Games
         protected void HandleRequest(GenericWebSocket socket, JObject requestJsonObject)
         {
             var game = _controller.GetUserActiveGame(socket.User);
-            switch(game)
+            switch (game)
             {
                 case HumansGame humansGame:
                     humansGame?.ProcessRequest(socket, requestJsonObject);
@@ -70,7 +71,7 @@ namespace CheckersOnlineSPA.Services.Games
                     botGame?.ProcessRequest(socket, requestJsonObject);
                     break;
             }
-            
+
         }
     }
 }

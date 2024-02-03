@@ -22,7 +22,7 @@ namespace CheckersOnlineSPA.Services.Browser
                 await _next(context);
                 return;
             }
-            if (context.Request.Path == "/ws")
+            if (context.Request.Path == "/requestbrowsersocket")
             {
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 await RegisterWebSocketHandler(context, webSocket);

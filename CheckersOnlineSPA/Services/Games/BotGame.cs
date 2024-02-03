@@ -51,7 +51,7 @@ namespace CheckersOnlineSPA.Services.Games
             {
                 HumanPlayerSocket = socket;
                 HumanFakeController = new FakeController(true);
-                BotController = new BotController(false, 7);
+                BotController = new BotController(false, 6);
                 CheckersGame = new CheckersEngine.GameEngine.Game(BotController, HumanFakeController);
                 CheckersGame.InitializeGame();
                 ChangeState(GameState.WHITE_TURN);
