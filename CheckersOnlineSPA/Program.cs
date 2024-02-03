@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.WebSockets;
 using CheckersOnlineSPA.Services.Games;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("http://*:5124");
+builder.WebHost.UseUrls("http://192.168.0.101:5124");
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
@@ -46,10 +46,7 @@ string conn = "Server=192.168.0.101;Database=checkers;Uid=dimon;Pwd=qwerty123123
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySql(conn, ServerVersion.AutoDetect(conn)));
 
 var app = builder.Build();
-app.UseCors(x => x
-             .AllowAnyOrigin()
-             .AllowAnyMethod()
-             .AllowAnyHeader());
+app.UseCors();
 app.UseStaticFiles();
 app.UseRouting();
 app.UseWebSockets();
