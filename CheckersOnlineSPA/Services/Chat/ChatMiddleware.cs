@@ -22,7 +22,7 @@
             {
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 var genericWebSocket = new GenericWebSocket(context, webSocket);
-                HandleCharRequest(context, genericWebSocket);
+                HandleChatRequest(context, genericWebSocket);
             }
             else
             {
@@ -32,17 +32,21 @@
         }
 
 
-        public async Task HandleCharRequest(HttpContext context, GenericWebSocket socket)
+        public async Task HandleChatRequest(HttpContext context, GenericWebSocket socket)
         {
-            // TODO: Invent handle of requests to chat
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.CancelAfter(5000); // at least 5 seconds for this communication
+            cancellationTokenSource.CancelAfter(1000); // max 1000ms for this communication
             var message = await socket.ReceiveMessageAsync(cancellationTokenSource.Token);
             if ( message == null || message.ContainsKey("type") == false || message["type"].ToString() != "connectToChatRoom")
                 return;
             int roomId = Convert.ToInt32(message["room_id"]);
-            
-
+            var room = ChatRoomsController.GetRoomById(roomId);
+            if (room == null)
+                return;
+            var client = room.AcceptClientConnect(socket);
+            if( client == null ) 
+                return;
+           // TODO: inform client about ChatClient type
         }
     }
 }

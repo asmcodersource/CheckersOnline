@@ -3,19 +3,26 @@
     public class ChatRoomsController
     {
         private int i = 0;
-        public List<ChatRoom> ChatRooms { get; protected set; } = new List<ChatRoom>();
-        protected Dictionary<int, ChatRoom> RoomsDictionary = new Dictionary<int, ChatRoom>();
-        
-        public ChatRoom CreateChatRoom()
+        public List<IChatRoom> ChatRooms { get; protected set; } = new List<IChatRoom>();
+        protected Dictionary<int, IChatRoom> RoomsDictionary = new Dictionary<int, IChatRoom>();
+
+        public IChatRoom? GetRoomById(int id)
+        {
+            if( RoomsDictionary.ContainsKey(id))
+                return RoomsDictionary[i];
+            return null;
+        }
+
+        public PublicGameChatRoom CreateChatRoom()
         {
             int creatingRoomId = ClaimNewRoomId();
-            ChatRoom chatRoom = new ChatRoom(creatingRoomId);
+            PublicGameChatRoom chatRoom = new PublicGameChatRoom(creatingRoomId);
             RoomsDictionary.Add(creatingRoomId, chatRoom);
             ChatRooms.Add(chatRoom);
             return chatRoom;
         }
 
-        public void RemoveChatRoom(ChatRoom chatRoom)
+        public void RemoveChatRoom(PublicGameChatRoom chatRoom)
         {
             RoomsDictionary.Remove(chatRoom.Id);
             ChatRooms.Remove(chatRoom);
