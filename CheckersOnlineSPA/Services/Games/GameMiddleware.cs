@@ -38,7 +38,7 @@ namespace CheckersOnlineSPA.Services.Games
         public async Task RegisterWebSocketHandler(HttpContext context, System.Net.WebSockets.WebSocket webSocket)
         {
             var handler = new GenericWebSocket(context, webSocket);
-            handler.RequestReceived += HandleRequest;
+            handler.MessageReceived += HandleRequest;
             handler.SocketClosed += SocketClosedRequest;
 
             await Task.Yield();

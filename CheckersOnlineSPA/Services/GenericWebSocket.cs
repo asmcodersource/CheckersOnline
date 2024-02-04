@@ -16,8 +16,9 @@ namespace CheckersOnlineSPA.Services
     {
         public event Action<GenericWebSocket> SocketOpened;
         public event Action<GenericWebSocket> SocketClosed;
-        public event Action<GenericWebSocket, JObject> RequestReceived;
+        public event Action<GenericWebSocket, JObject> MessageReceived;
         public ClaimsPrincipal User { get; set; }
+        public bool IsListening { get; set; } = false;
         System.Net.WebSockets.WebSocket _socket;
 
         public GenericWebSocket(HttpContext context, System.Net.WebSockets.WebSocket socket)
@@ -59,10 +60,21 @@ namespace CheckersOnlineSPA.Services
             catch (WebSocketException exception) { }
         }
 
+        public async Task<JObject> ReceiveMessageAsync(CancellationToken cancellationToken)
+        {
+            if (IsListening)
+                throw new Exception("Socket is used to listen in another method");
+
+            ArraySegment<byte> receiveBuffer = new ArraySegment<byte>(new byte[8192]);
+            await _socket.ReceiveAsync(receiveBuffer, cancellationToken);
+            return await RequestHandler(receiveBuffer);
+        }
+
         public async Task Handle()
         {
             try
             {
+                IsListening = true;
                 SocketOpened?.Invoke(this);
                 while (true)
                 {
@@ -74,20 +86,24 @@ namespace CheckersOnlineSPA.Services
             catch (WebSocketException exception) { }
             finally
             {
+                IsListening = false;
                 SocketClosed?.Invoke(this);
             }
         }
 
-        protected async Task RequestHandler(ArraySegment<byte> receiveBuffer)
+        protected async Task<JObject> RequestHandler(ArraySegment<byte> receiveBuffer)
         {
             var byteArray = receiveBuffer.ToArray();
-            var requestString = Encoding.UTF8.GetString(byteArray);
+            var messageString = Encoding.UTF8.GetString(byteArray);
             try
             {
-                var jsonObject = JObject.Parse(requestString);
-                RequestReceived?.Invoke(this, jsonObject);
+                var jsonObject = JObject.Parse(messageString);
+                MessageReceived?.Invoke(this, jsonObject);
+                return jsonObject;
             }
             catch (JsonReaderException ex) { }
+            return null;
         }
+
     }
 }

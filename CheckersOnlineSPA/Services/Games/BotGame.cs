@@ -91,7 +91,6 @@ namespace CheckersOnlineSPA.Services.Games
                 if (result == CheckersOnlineSPA.CheckersEngine.GameEngine.GameState.WrongActionProvided)
                     return;
 
-                await Task.Delay(50);
                 await SynchronizeAction(action);
                 await PerformBotAction();
             }
@@ -106,41 +105,47 @@ namespace CheckersOnlineSPA.Services.Games
                 return;
             var result = await CheckersGame.MakeStep();
             var action = CheckersGame.GetLastAction();
+            await Task.Delay(500);
             await SynchronizeAction(action);
             await PerformBotAction();
         }
 
         protected async Task SynchronizeAction(CheckerAction checkerAction)
         {
-
-            var moveAction = new
+            try
             {
-                type = "moveAction",
-                firstPosition = new
+                var moveAction = new
                 {
-                    row = checkerAction.FieldStartPosition.Y,
-                    column = checkerAction.FieldStartPosition.X,
-                },
-                secondPosition = new
-                {
-                    row = checkerAction.FieldEndPosition.Y,
-                    column = checkerAction.FieldEndPosition.X,
-                },
-            };
-            await HumanPlayerSocket.SendResponseJson(moveAction);
-
-            if (checkerAction is CheckerBeatAction beatAction)
-            {
-                var removeAction = new
-                {
-                    type = "removeAction",
-                    removePosition = new
+                    type = "moveAction",
+                    firstPosition = new
                     {
-                        row = beatAction.CheckerRemovePosition.Y,
-                        column = beatAction.CheckerRemovePosition.X,
-                    }
+                        row = checkerAction.FieldStartPosition.Y,
+                        column = checkerAction.FieldStartPosition.X,
+                    },
+                    secondPosition = new
+                    {
+                        row = checkerAction.FieldEndPosition.Y,
+                        column = checkerAction.FieldEndPosition.X,
+                    },
                 };
-                await HumanPlayerSocket.SendResponseJson(removeAction);
+                await HumanPlayerSocket.SendResponseJson(moveAction);
+
+                if (checkerAction is CheckerBeatAction beatAction)
+                {
+                    var removeAction = new
+                    {
+                        type = "removeAction",
+                        removePosition = new
+                        {
+                            row = beatAction.CheckerRemovePosition.Y,
+                            column = beatAction.CheckerRemovePosition.X,
+                        }
+                    };
+                    await HumanPlayerSocket.SendResponseJson(removeAction);
+                }
+            } catch (Exception ex)
+            {
+                // I don't know...
             }
         }
 

@@ -39,7 +39,7 @@ namespace CheckersOnlineSPA.Services.Browser
             var handler = new GenericWebSocket(context, webSocket);
             handler.SocketOpened += (socketHandler) => _controller.AddSocket(socketHandler);
             handler.SocketClosed += (socketHandler) => _controller.RemoveSocket(socketHandler);
-            handler.RequestReceived += (socketHandler, requestObject) => _controller.RequestHandler(socketHandler, requestObject);
+            handler.MessageReceived += (socketHandler, requestObject) => _controller.RequestHandler(socketHandler, requestObject);
             await Task.Yield();
             await handler.Handle();
         }

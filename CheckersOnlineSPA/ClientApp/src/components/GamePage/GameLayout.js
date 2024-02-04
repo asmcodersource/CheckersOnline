@@ -90,7 +90,7 @@ export class GameLayout extends Component {
             this.gameWebSocket.close();
 
 
-        let target = 'ws://95.47.167.113:5124';
+        let target = 'ws://192.168.0.100:44463';
         this.gameWebSocket = new WebSocket(`${target}/requestgamesocket?token=${token}`);
         this.gameWebSocket.onopen = async (event) => {
             await new Promise(resolve => setTimeout(resolve, 500));

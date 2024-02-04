@@ -29,7 +29,7 @@ module.exports = function (app) {
         createProxyMiddleware('/requestbrowsersocket', {
             target: webSocketTarget,
             ws: true,
-            changeOrigin: true,
+            changeOrigin: false,
         })
     );
 

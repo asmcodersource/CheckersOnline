@@ -9,7 +9,7 @@ using Microsoft.AspNetCore.WebSockets;
 using CheckersOnlineSPA.Services.Games;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.WebHost.UseUrls("http://*:5124");
+builder.WebHost.UseUrls("http://192.168.0.100:5124");
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAll",
