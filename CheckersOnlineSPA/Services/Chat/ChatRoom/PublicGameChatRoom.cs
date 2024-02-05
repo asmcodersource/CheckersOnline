@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json.Linq;
 using CheckersOnlineSPA.Services.Chat.ChatClient;
 using CheckersOnlineSPA.Services.Chat.ChatRoomAcceptRules;
+using CheckersOnlineSPA.Services.Chat.ChatRoom;
 
 namespace CheckersOnlineSPA.Services.Chat
 {
@@ -8,6 +9,7 @@ namespace CheckersOnlineSPA.Services.Chat
     {
         public event Action<IChatClient> ClientConnected;
         public event Action<IChatClient> ClientDisconnected;
+        public ChatRoomType RoomType { get; protected set; } = ChatRoomType.PublicChatRoom;
         public int Id { get; protected set; }
         protected List<IChatClient> Clients { get; set; }
         public ChatRoomRuleABEC ChatRoomRuleABEC { get; protected set; }
@@ -38,6 +40,16 @@ namespace CheckersOnlineSPA.Services.Chat
                 return null;
             Clients.Add(client); 
             return client;
+        }
+
+        public void HandleClientRequest(IChatClient? client, JObject request)
+        {
+
+        }
+
+        public int GetRoomID()
+        {
+            return Id;
         }
     }
 }

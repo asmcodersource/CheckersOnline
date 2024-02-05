@@ -1,4 +1,6 @@
-﻿namespace CheckersOnlineSPA.Services.Chat
+﻿using CheckersOnlineSPA.Services.Chat.ChatRoom;
+
+namespace CheckersOnlineSPA.Services.Chat
 {
     public class ChatRoomsController
     {
@@ -13,10 +15,17 @@
             return null;
         }
 
-        public PublicGameChatRoom CreateChatRoom()
+        public IChatRoom? CreateChatRoom(ChatRoomType chatRoomType)
         {
             int creatingRoomId = ClaimNewRoomId();
-            PublicGameChatRoom chatRoom = new PublicGameChatRoom(creatingRoomId);
+            IChatRoom? chatRoom = null;
+            switch (chatRoomType) {
+                case ChatRoomType.PublicChatRoom:
+                    chatRoom = new PublicGameChatRoom(creatingRoomId);
+                    break;
+            };
+            if (chatRoom == null)
+                return null;
             RoomsDictionary.Add(creatingRoomId, chatRoom);
             ChatRooms.Add(chatRoom);
             return chatRoom;

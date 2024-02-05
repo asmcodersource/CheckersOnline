@@ -1,4 +1,5 @@
 ﻿using CheckersOnlineSPA.Data;
+using CheckersOnlineSPA.Services.Chat;
 using CheckersOnlineSPA.Services.Games;
 using Microsoft.AspNetCore.DataProtection;
 using Newtonsoft.Json.Linq;
@@ -11,11 +12,13 @@ namespace CheckersOnlineSPA.Services.Browser
     {
         public int LastRoomId { get; protected set; } = 0;
         protected GamesController gamesController;
+        protected ChatRoomsController chatRoomsController;
         protected List<GenericWebSocket> socketsHandlers = new List<GenericWebSocket>();
         public Dictionary<string, GameRoom> gameRooms { get; protected set; } = new Dictionary<string, GameRoom>();
 
-        public BrowserController(GamesController gamesController)
+        public BrowserController(GamesController gamesController, ChatRoomsController chatRoomsController)
         {
+            this.chatRoomsController = chatRoomsController;
             this.gamesController = gamesController;
         }
 
@@ -78,25 +81,22 @@ namespace CheckersOnlineSPA.Services.Browser
             }
         }
 
-        protected bool ClaimRoom(string roomId, ClaimsPrincipal claimUser, GenericWebSocket claimSocket)
+        protected async Task<bool> ClaimRoom(string roomId, ClaimsPrincipal claimUser, GenericWebSocket claimSocket)
         {
-            lock (this)
-            {
-                if (gameRooms.ContainsKey(roomId) == false)
-                    return false;
-                Claim claimId = claimUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-                var id = claimId.Value;
-                if (id == roomId)
-                    return false;
-                var room = RemoveRoom(roomId);
-                SendNotifyRoomRemoved(room);
-                var game = new HumansGame(room.ClientCreator, claimUser, gamesController);
-                gamesController.CreateGameRoom(game);
-                // notify that room has claimed for two of players
-                room.CreatorSocket.SendResponseJson(new { type="claimRoom", state="roomClaimed" });
-                claimSocket.SendResponseJson(new { type = "claimRoom", state = "roomClaimed" });
-                return true;
-            }
+            if (gameRooms.ContainsKey(roomId) == false)
+                return false;
+            Claim claimId = claimUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+            var id = claimId.Value;
+            if (id == roomId)
+                return false;
+            var room = RemoveRoom(roomId);
+            SendNotifyRoomRemoved(room);
+            var game = new HumansGame(room.ClientCreator, claimUser, gamesController, chatRoomsController);
+            gamesController.CreateGameRoom(game);
+            // notify that room has claimed for two of players
+            await room.CreatorSocket.SendResponseJson(new { type="claimRoom", state="roomClaimed" });
+            await claimSocket.SendResponseJson(new { type = "claimRoom", state = "roomClaimed" });
+            return true;
         }
 
         protected bool CreateBotRoom(ClaimsPrincipal clientCreator, GenericWebSocket browserSocket)

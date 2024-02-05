@@ -34,7 +34,15 @@ module.exports = function (app) {
     );
 
     app.use(
-        createProxyMiddleware('/requestgamesocket', {
+        createProxyMiddleware('/requestbrowsersocket', {
+            target: webSocketTarget,
+            ws: true,
+            changeOrigin: false,
+        })
+    );
+
+    app.use(
+        createProxyMiddleware('/requestChatSocket', {
             target: webSocketTarget,
             ws: true,
             changeOrigin: true,

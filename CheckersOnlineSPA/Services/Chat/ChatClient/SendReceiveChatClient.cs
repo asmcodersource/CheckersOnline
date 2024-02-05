@@ -40,11 +40,18 @@ namespace CheckersOnlineSPA.Services.Chat
             switch (request["type"].ToString())
             {
                 case "clientSide":
+                    HandleClientRequest(request);
                     break;
                 case "roomSide":
+                    Room.HandleClientRequest(this, request);
                     break;
             }
             
+        }
+
+        protected void HandleClientRequest( JObject request )
+        {
+
         }
 
         protected void ClientSocketCloseHandler(GenericWebSocket socket)

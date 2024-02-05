@@ -6,6 +6,7 @@ using System.Net.Sockets;
 using System.Text.Json.Nodes;
 using CheckersOnlineSPA.CheckersEngine.GameEngine;
 using Mysqlx.Resultset;
+using CheckersOnlineSPA.Services.Chat;
 
 namespace CheckersOnlineSPA.Services.Games
 {
@@ -24,12 +25,14 @@ namespace CheckersOnlineSPA.Services.Games
         public FakeController? WhiteFakeController { get; set; }
         public FakeController? BlackFakeController { get; set; }
         public GamesController GamesController { get; set; }
+        public IChatRoom ChatRoom { get; set; }
 
-        public HumansGame(ClaimsPrincipal firstPlayer, ClaimsPrincipal secondPlayer, GamesController gamesController)
+        public HumansGame(ClaimsPrincipal firstPlayer, ClaimsPrincipal secondPlayer, GamesController gamesController, ChatRoomsController chatRoomsController)
         {
             this.FirstPlayerEmail = firstPlayer.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
             this.SecondPlayerEmail = secondPlayer.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
             GamesController = gamesController;
+            CreateGameChat(chatRoomsController);
         }
 
         public void ProcessRequest(GenericWebSocket socket, JObject jsonObject)
@@ -46,6 +49,9 @@ namespace CheckersOnlineSPA.Services.Games
                         case "makeAction":
                             ProcessPlayerAction(socket, jsonObject);
                             break;
+                        case "requestChatId":
+                            HandleChatIdRequest(socket, jsonObject);
+                            break;
                     }
                 }
             } catch (Exception ex)
@@ -54,22 +60,74 @@ namespace CheckersOnlineSPA.Services.Games
             }
         }
 
-        protected void ConnectPlayer(GenericWebSocket socket, JObject jsonObject)
+        public void PlayerDisconnected(GenericWebSocket socket)
         {
             var email = socket.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
             if (FirstPlayerEmail == email)
-                FirstPlayerSocket = socket;
-            if( SecondPlayerEmail == email)
-                SecondPlayerSocket = socket;
-            if (FirstPlayerSocket != null && SecondPlayerSocket != null)
+                FirstPlayerSocket = null;
+            if (SecondPlayerEmail == email)
+                SecondPlayerSocket = null;
+            if (SecondPlayerSocket == null && FirstPlayerSocket == null)
+                GamesController.CloseGameRoom(this);
+        }
+
+        protected void HandleChatIdRequest(GenericWebSocket socket, JObject jsonObject)
+        {
+            var response = new
             {
-                WhiteFakeController = new FakeController(true);
-                BlackFakeController = new FakeController(false);
-                CheckersGame = new CheckersEngine.GameEngine.Game(BlackFakeController, WhiteFakeController);
-                CheckersGame.InitializeGame();
-                ChangeState(GameState.WHITE_TURN);
+                type = "ChatIdResponse",
+                chatId = ChatRoom.GetRoomID(),
+            };
+            socket.SendResponseJson(response);
+        }
+
+        protected void CreateGameChat(ChatRoomsController chatRoomsController)
+        {
+            PublicGameChatRoom room = chatRoomsController.CreateChatRoom(Chat.ChatRoom.ChatRoomType.PublicChatRoom) as PublicGameChatRoom;
+            room.ChatRoomRuleABEC.AddAllowedEmail(FirstPlayerEmail);
+            room.ChatRoomRuleABEC.AddAllowedEmail(SecondPlayerEmail);
+            this.ChatRoom = room;
+        }
+
+        protected void ConnectPlayer(GenericWebSocket socket, JObject jsonObject)
+        {
+            lock (this)
+            {
+                var email = socket.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+                if (FirstPlayerEmail == email)
+                {
+                    FirstPlayerSocket = socket;
+                    ConnectionEstablishedResponse(socket);
+                }
+                if (SecondPlayerEmail == email)
+                {
+                    SecondPlayerSocket = socket;
+                    ConnectionEstablishedResponse(socket);
+                }
+                if (FirstPlayerSocket != null && SecondPlayerSocket != null)
+                {
+                    WhiteFakeController = new FakeController(true);
+                    BlackFakeController = new FakeController(false);
+                    CheckersGame = new CheckersEngine.GameEngine.Game(BlackFakeController, WhiteFakeController);
+                    CheckersGame.InitializeGame();
+                    ChangeState(GameState.WHITE_TURN);
+                }
             }
         }
+
+        protected async void ConnectionEstablishedResponse(GenericWebSocket socket)
+        {
+            try
+            {
+                var response = new
+                {
+                    type = "connectionEstablished",
+                    chatId = ChatRoom.GetRoomID(),
+                };
+                await socket.SendResponseJson(response);
+            } catch { }
+        }
+
         protected async void ProcessPlayerAction(GenericWebSocket socket, JObject jsonObject)
         {
             if (CurrentGameState != GameState.BLACK_TURN && CurrentGameState != GameState.WHITE_TURN)
@@ -132,17 +190,6 @@ namespace CheckersOnlineSPA.Services.Games
                 };
                 await SendToBothPlayers(removeAction);
             }
-        }
-
-        public void PlayerDisconnected(GenericWebSocket socket)
-        {
-            var email = socket.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
-            if (FirstPlayerEmail == email)
-                FirstPlayerSocket = null;
-            if( SecondPlayerEmail == email) 
-                SecondPlayerSocket = null;
-            if (SecondPlayerSocket == null || FirstPlayerSocket == null)
-                GamesController.CloseGameRoom(this);
         }
 
         protected async Task SendToBothPlayers(object data)

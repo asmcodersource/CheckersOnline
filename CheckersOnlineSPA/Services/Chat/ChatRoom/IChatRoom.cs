@@ -1,5 +1,6 @@
 ﻿using MySqlX.XDevAPI;
 using CheckersOnlineSPA.Services.Chat.ChatClient;
+using Newtonsoft.Json.Linq;
 
 namespace CheckersOnlineSPA.Services.Chat
 {
@@ -9,7 +10,9 @@ namespace CheckersOnlineSPA.Services.Chat
     /// </summary>
     public interface IChatRoom
     {
+        public int GetRoomID();
         public IChatClient? AcceptClientConnect(GenericWebSocket socket);
+        public void HandleClientRequest(IChatClient? client, JObject request);
         public void AddClient(IChatClient chatClient);
         public void RemoveClient(IChatClient chatClient);
 

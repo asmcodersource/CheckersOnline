@@ -3,10 +3,13 @@ import { CheckersField } from './GameField/CheckersField';
 import { RightSideMenu } from './RightSideMenu/RightSideMenu';
 import './GameLayout.css';
 
+const ChatClient = require('./ChatClient');
+
 export class GameLayout extends Component {
     constructor(props) {
         super(props);
 
+        this.chatClient = null;
         this.gameWebSocket = null;
         this.tryLoginByStoredToken = this.tryLoginByStoredToken.bind(this);
         this.mouseClicked = this.mouseClicked.bind(this);
@@ -90,7 +93,7 @@ export class GameLayout extends Component {
             this.gameWebSocket.close();
 
 
-        let target = 'ws://192.168.0.100:44463';
+        let target = 'ws://95.47.167.113:5124';
         this.gameWebSocket = new WebSocket(`${target}/requestgamesocket?token=${token}`);
         this.gameWebSocket.onopen = async (event) => {
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -99,8 +102,9 @@ export class GameLayout extends Component {
         this.gameWebSocket.onmessage = (event) => {
             try {
                 const message = JSON.parse(event.data);
-                console.log(message);
-                if (message["type"] == "moveAction") {
+                if (message["type"] == "connectionEstablished") {
+                    this.chatClient = new ChatClient(token, message["chatId"])
+                } else if (message["type"] == "moveAction") {
                     let x1 = message["firstPosition"]["column"];
                     let y1 = message["firstPosition"]["row"];
                     let x2 = message["secondPosition"]["column"];
@@ -119,7 +123,6 @@ export class GameLayout extends Component {
 
     async tryLoginByStoredToken() {
         const token = sessionStorage.getItem('token')
-        console.log(token);
         const response = await fetch("/tokenvalidation", {
             method: "POST",
             headers: {
@@ -129,7 +132,6 @@ export class GameLayout extends Component {
             },
         });
         if (response.ok === true) {
-            console.log(response);
             const data = await response.json();
             this.setState({ user: { id: data.id, nickname: data.userName, email: data.email } })
             this.createGameWebsocket();

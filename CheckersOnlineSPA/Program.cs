@@ -7,6 +7,7 @@ using CheckersOnlineSPA.Services.OnlineClientsWatcher;
 using CheckersOnlineSPA.Services.Browser;
 using Microsoft.AspNetCore.WebSockets;
 using CheckersOnlineSPA.Services.Games;
+using CheckersOnlineSPA.Services.Chat;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.WebHost.UseUrls("http://192.168.0.100:5124");
@@ -27,6 +28,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddSingleton<BrowserController>();
 //builder.Services.AddSingleton<OnlineClientsWatcher>();
 builder.Services.AddSingleton<GamesController>();
+builder.Services.AddSingleton<ChatRoomsController>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -55,6 +57,7 @@ app.UseAuthorization();
 
 app.UseMiddleware<GameMiddleware>();
 app.UseMiddleware<BrowserMiddleware>();
+app.UseMiddleware<ChatMiddleware>();
 //app.UseMiddleware<ClientsCounterMiddleware>();
 
 

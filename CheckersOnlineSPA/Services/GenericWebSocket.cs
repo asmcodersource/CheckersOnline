@@ -53,9 +53,9 @@ namespace CheckersOnlineSPA.Services
         {
             try
             {
-                var objJson = System.Text.Json.JsonSerializer.Serialize(obj);
-                var jsonBytes = Encoding.UTF8.GetBytes(objJson);
-                await _socket.SendAsync(jsonBytes, WebSocketMessageType.Text, true, CancellationToken.None);
+                    var objJson = System.Text.Json.JsonSerializer.Serialize(obj);
+                    var jsonBytes = Encoding.UTF8.GetBytes(objJson);
+                    await _socket.SendAsync(jsonBytes, WebSocketMessageType.Text, true, CancellationToken.None);
             }
             catch (WebSocketException exception) { }
         }
