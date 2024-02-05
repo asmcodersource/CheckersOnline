@@ -57,9 +57,7 @@ namespace CheckersOnlineSPA.Services
                     var jsonBytes = Encoding.UTF8.GetBytes(objJson);
                     await _socket.SendAsync(jsonBytes, WebSocketMessageType.Text, true, CancellationToken.None);
             }
-            catch {
-                Console.WriteLine("We got exception?");
-            }
+            catch {}
         }
 
         public async Task<JObject> ReceiveMessageAsync(CancellationToken cancellationToken)

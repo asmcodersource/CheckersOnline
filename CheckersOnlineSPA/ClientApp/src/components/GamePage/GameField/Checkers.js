@@ -12,8 +12,11 @@ export class Checker extends Component {
     }
 
     render() {
-        const posX = this.props.position.cellX * 64;
-        const posY = this.props.position.cellY * 64;
+        var field = document.querySelector(".checker-field");
+        console.log(field);
+
+        const posX = this.props.position.cellX * field.clientWidth / 8;
+        const posY = this.props.position.cellY * field.clientHeight / 8;
         let imgSrc = null;
         if (this.props.color == 'White')
             imgSrc = this.props.type == 'Queen' ? whiteQueen : whiteChecker;

@@ -15,39 +15,29 @@ const context = [
     "/statistic",
 ];
 
+const webSocketContext = [
+    "/requestbrowsersocket",
+    "/requestgamesocket",
+    "/requestChatSocket",
+]
+
 module.exports = function (app) {
-    const appProxy = createProxyMiddleware(context, {
-        proxyTimeout: 10000,
-        target: target,
-        secure: false,
-        headers: {
-            Connection: 'Keep-Alive'
-        }
-    });
+    app.use(
+        createProxyMiddleware(context, {
+            proxyTimeout: 10000,
+            target: target,
+            secure: false,
+            headers: {
+                Connection: 'Keep-Alive'
+            }
+        })
+    );
 
     app.use(
-        createProxyMiddleware('/requestbrowsersocket', {
+        createProxyMiddleware(webSocketContext, {
             target: webSocketTarget,
             ws: true,
             changeOrigin: false,
         })
     );
-
-    app.use(
-        createProxyMiddleware('/requestbrowsersocket', {
-            target: webSocketTarget,
-            ws: true,
-            changeOrigin: false,
-        })
-    );
-
-    app.use(
-        createProxyMiddleware('/requestChatSocket', {
-            target: webSocketTarget,
-            ws: true,
-            changeOrigin: true,
-        })
-    );
-
-    app.use(appProxy);
 };
