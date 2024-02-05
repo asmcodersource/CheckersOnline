@@ -83,20 +83,26 @@ namespace CheckersOnlineSPA.Services.Browser
 
         protected async Task<bool> ClaimRoom(string roomId, ClaimsPrincipal claimUser, GenericWebSocket claimSocket)
         {
-            if (gameRooms.ContainsKey(roomId) == false)
-                return false;
-            Claim claimId = claimUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
-            var id = claimId.Value;
-            if (id == roomId)
-                return false;
-            var room = RemoveRoom(roomId);
-            SendNotifyRoomRemoved(room);
-            var game = new HumansGame(room.ClientCreator, claimUser, gamesController, chatRoomsController);
-            gamesController.CreateGameRoom(game);
-            // notify that room has claimed for two of players
-            await room.CreatorSocket.SendResponseJson(new { type="claimRoom", state="roomClaimed" });
-            await claimSocket.SendResponseJson(new { type = "claimRoom", state = "roomClaimed" });
-            return true;
+            try
+            {
+                if (gamesController.GetUserActiveGame(claimUser) != null)
+                    return false; 
+                if (gameRooms.ContainsKey(roomId) == false)
+                    return false;
+                Claim claimId = claimUser.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
+                var id = claimId.Value;
+                if (id == roomId)
+                    return false;
+                var room = RemoveRoom(roomId);
+                SendNotifyRoomRemoved(room);
+                var game = new HumansGame(room.ClientCreator, claimUser, gamesController, chatRoomsController);
+                gamesController.CreateGameRoom(game);
+                // notify that room has claimed for two of players
+                await room.CreatorSocket.SendResponseJson(new { type = "claimRoom", state = "roomClaimed" });
+                await claimSocket.SendResponseJson(new { type = "claimRoom", state = "roomClaimed" });
+                return true;
+            } catch {}
+            return false;
         }
 
         protected bool CreateBotRoom(ClaimsPrincipal clientCreator, GenericWebSocket browserSocket)

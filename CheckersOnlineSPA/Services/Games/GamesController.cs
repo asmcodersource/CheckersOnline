@@ -10,7 +10,6 @@ namespace CheckersOnlineSPA.Services.Games
         public Dictionary<string, IGame> gameByFirstPlayer { get; protected set; } = new Dictionary<string, IGame>();
         public Dictionary<string, IGame> gameBySecondPlayer { get; protected set; } = new Dictionary<string, IGame>();
 
-    
         public int CreateGameRoom(IGame game)
         {
             ActiveGames.Add(game);
@@ -32,7 +31,7 @@ namespace CheckersOnlineSPA.Services.Games
             {
                 case HumansGame humansGame:
                     gameByFirstPlayer.Remove(humansGame.FirstPlayerEmail);
-                    gameByFirstPlayer.Remove(humansGame.SecondPlayerEmail);
+                    gameBySecondPlayer.Remove(humansGame.SecondPlayerEmail);
                     break;
                 case BotGame botGame:
                     gameByFirstPlayer.Remove(botGame.HumanPlayerEmail);
