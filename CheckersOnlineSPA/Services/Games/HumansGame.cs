@@ -27,6 +27,8 @@ namespace CheckersOnlineSPA.Services.Games
         public GamesController GamesController { get; set; }
         public IChatRoom ChatRoom { get; set; }
 
+        public List<GenericWebSocket> ActionsListeners { get; protected set; } = new List<GenericWebSocket>();
+
         public HumansGame(ClaimsPrincipal firstPlayer, ClaimsPrincipal secondPlayer, GamesController gamesController, ChatRoomsController chatRoomsController)
         {
             this.FirstPlayerEmail = firstPlayer.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
@@ -39,46 +41,31 @@ namespace CheckersOnlineSPA.Services.Games
         {
             try
             {
-                lock (this)
+                switch (jsonObject["type"].ToString())
                 {
-                    switch (jsonObject["type"].ToString())
-                    {
-                        case "connectToRoom":
-                            ConnectPlayer(socket, jsonObject);
-                            break;
-                        case "makeAction":
-                            ProcessPlayerAction(socket, jsonObject);
-                            break;
-                        case "requestChatId":
-                            HandleChatIdRequest(socket, jsonObject);
-                            break;
-                    }
+                    case "connectToRoom":
+                        ConnectPlayer(socket, jsonObject);
+                        break;
+                    case "makeAction":
+                        ProcessPlayerAction(socket, jsonObject);
+                        break;
+                    case "requestChatId":
+                        Game.HandleRequestChatId(this, socket);
+                        break;
                 }
-            } catch (Exception ex)
-            {
-
-            }
+            } catch { }
         }
 
         public void PlayerDisconnected(GenericWebSocket socket)
         {
             var email = socket.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+            ActionsListeners.Remove(socket);
             if (FirstPlayerEmail == email)
                 FirstPlayerSocket = null;
             if (SecondPlayerEmail == email)
                 SecondPlayerSocket = null;
             if (SecondPlayerSocket == null && FirstPlayerSocket == null)
                 GamesController.CloseGameRoom(this);
-        }
-
-        protected void HandleChatIdRequest(GenericWebSocket socket, JObject jsonObject)
-        {
-            var response = new
-            {
-                type = "ChatIdResponse",
-                chatId = ChatRoom.GetRoomID(),
-            };
-            socket.SendResponseJson(response);
         }
 
         protected void CreateGameChat(ChatRoomsController chatRoomsController)
@@ -91,41 +78,27 @@ namespace CheckersOnlineSPA.Services.Games
 
         protected void ConnectPlayer(GenericWebSocket socket, JObject jsonObject)
         {
-            lock (this)
+            var email = socket.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
+            if( email == FirstPlayerEmail || email == SecondPlayerEmail)
             {
-                var email = socket.User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
-                if (FirstPlayerEmail == email)
-                {
+                if (email == FirstPlayerEmail)
                     FirstPlayerSocket = socket;
-                    ConnectionEstablishedResponse(socket);
-                }
-                if (SecondPlayerEmail == email)
-                {
+                else
                     SecondPlayerSocket = socket;
-                    ConnectionEstablishedResponse(socket);
-                }
-                if (FirstPlayerSocket != null && SecondPlayerSocket != null)
+                ActionsListeners.Add(socket);
+                Game.ConnectionEstablishedResponse(socket, this);
+                lock (this)
                 {
-                    WhiteFakeController = new FakeController(true);
-                    BlackFakeController = new FakeController(false);
-                    CheckersGame = new CheckersEngine.GameEngine.Game(BlackFakeController, WhiteFakeController);
-                    CheckersGame.InitializeGame();
-                    ChangeState(GameState.WHITE_TURN);
+                    if (FirstPlayerSocket != null && SecondPlayerSocket != null)
+                    {
+                        WhiteFakeController = new FakeController(true);
+                        BlackFakeController = new FakeController(false);
+                        CheckersGame = new CheckersEngine.GameEngine.Game(BlackFakeController, WhiteFakeController);
+                        CheckersGame.InitializeGame();
+                        ChangeState(GameState.WHITE_TURN);
+                    }
                 }
-            }
-        }
-
-        protected async void ConnectionEstablishedResponse(GenericWebSocket socket)
-        {
-            try
-            {
-                var response = new
-                {
-                    type = "connectionEstablished",
-                    chatId = ChatRoom.GetRoomID(),
-                };
-                await socket.SendResponseJson(response);
-            } catch { }
+            } 
         }
 
         protected async void ProcessPlayerAction(GenericWebSocket socket, JObject jsonObject)
@@ -138,66 +111,12 @@ namespace CheckersOnlineSPA.Services.Games
             if( CurrentGameState == GameState.WHITE_TURN && playerColor == "white" || CurrentGameState == GameState.BLACK_TURN && playerColor == "black")
             {
                 var controller = playerColor == "white" ? WhiteFakeController : BlackFakeController;
-                int x1 = Convert.ToInt32(jsonObject["firstPosition"]["column"]);
-                int y1 = Convert.ToInt32(jsonObject["firstPosition"]["row"]);
-                int x2 = Convert.ToInt32(jsonObject["secondPosition"]["column"]);
-                int y2 = Convert.ToInt32(jsonObject["secondPosition"]["row"]);
-                var action = controller.GetActionByMove(CheckersGame, x1, y1, x2, y2);
-                if (action == null)
-                    return;
-                var result = await CheckersGame.MakeStep();
-                if (result == CheckersOnlineSPA.CheckersEngine.GameEngine.GameState.WrongActionMustBeat)
-                    return;
-                if (result == CheckersOnlineSPA.CheckersEngine.GameEngine.GameState.WrongActionProvided)
-                    return;
-
-                await SynchronizeAction(action);
+                var action = Game.ParsePlayerAction(controller, CheckersGame, jsonObject);
+                var result = await Game.ExecutePlayerAction(action, CheckersGame);
+                await Game.SyncCheckerAction(ActionsListeners, action);
                 if ( CheckersOnlineSPA.CheckersEngine.GameEngine.GameState.WaitForNextStep == result)
-                {
-                    CurrentGameState = CheckersGame.IsWhiteTurn ? GameState.WHITE_TURN : GameState.BLACK_TURN;
-                }
+                    ChangeState(CheckersGame.IsWhiteTurn ? GameState.WHITE_TURN : GameState.BLACK_TURN);
             }
-        }
-
-        protected async Task SynchronizeAction(CheckerAction checkerAction)
-        {
-
-            var moveAction = new
-            {
-                type = "moveAction",
-                firstPosition = new
-                {
-                    row = checkerAction.FieldStartPosition.Y,
-                    column = checkerAction.FieldStartPosition.X,
-                },
-                secondPosition = new
-                {
-                    row = checkerAction.FieldEndPosition.Y,
-                    column = checkerAction.FieldEndPosition.X,
-                },
-            };
-            await SendToBothPlayers(moveAction);
-
-            if (checkerAction is CheckerBeatAction beatAction) {
-                var removeAction = new
-                {
-                    type = "removeAction",
-                    removePosition = new
-                    {
-                        row = beatAction.CheckerRemovePosition.Y,
-                        column = beatAction.CheckerRemovePosition.X,
-                    }
-                };
-                await SendToBothPlayers(removeAction);
-            }
-        }
-
-        protected async Task SendToBothPlayers(object data)
-        {
-            if (SecondPlayerSocket == null || FirstPlayerSocket == null)
-                throw new Exception("At least one of players is not initilized");
-            await SecondPlayerSocket.SendResponseJson(data);
-            await FirstPlayerSocket.SendResponseJson(data);
         }
 
         protected void ChangeState(GameState newState) {

@@ -1,9 +1,10 @@
 import React, { Component } from 'react';
 import { CheckersField } from './GameField/CheckersField';
-import { RightSideMenu } from './RightSideMenu/RightSideMenu';
+import { Chat } from './Chat/Chat';
 import './GameLayout.css';
 
 const ChatClient = require('./ChatClient');
+
 
 export class GameLayout extends Component {
     constructor(props) {
@@ -25,11 +26,11 @@ export class GameLayout extends Component {
 
     render() {
         return (
-            <div className='game-layout'>
+            <div className='game-layout' id="gameField">
                 <div className="game-layout-wrapper">
                     <div className='menu-field-wrapper'>
                         <CheckersField ref={this.checkersFieldRef} mouseClicked={this.mouseClicked} />
-                        <RightSideMenu />
+                        <Chat />
                     </div>
                 </div>
             </div>
@@ -74,6 +75,8 @@ export class GameLayout extends Component {
     }
 
     async componentDidMount() {
+        var scrollDiv = document.getElementById("gameField").offsetTop;
+        window.scrollTo({ top: scrollDiv, behavior: 'smooth' });
         this.initializeField();
         await this.tryLoginByStoredToken();
 

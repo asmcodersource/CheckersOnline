@@ -108,7 +108,7 @@ namespace CheckersOnlineSPA.Services.Browser
         protected bool CreateBotRoom(ClaimsPrincipal clientCreator, GenericWebSocket browserSocket)
         {
             string email = clientCreator.Claims.FirstOrDefault(c => c.Type == ClaimTypes.Email).Value;
-            var game = new BotGame(email, gamesController);
+            var game = new BotGame(email, gamesController, chatRoomsController);
             gamesController.CreateGameRoom(game);
             browserSocket.SendResponseJson(new { type = "claimRoom", state = "roomClaimed" });
             return true;
