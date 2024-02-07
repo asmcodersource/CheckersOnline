@@ -19,14 +19,14 @@ namespace CheckersOnlineSPA.Services.Games
 
         public static async Task<CheckersEngine.GameEngine.GameState> ExecutePlayerAction(CheckerAction action, CheckersEngine.GameEngine.Game game)
         {
-            if (action == null)
-                throw new Exception("Null checker action");
-            var result = await game.MakeStep();
-            if (result == CheckersOnlineSPA.CheckersEngine.GameEngine.GameState.WrongActionMustBeat)
-                throw new Exception("Wrong action provided");
-            if (result == CheckersOnlineSPA.CheckersEngine.GameEngine.GameState.WrongActionProvided)
-                throw new Exception("Wrong action provided");
-            return result;
+                if (action == null)
+                    throw new Exception("Null checker action");
+                var result = await game.MakeStep();
+                if (result == CheckersOnlineSPA.CheckersEngine.GameEngine.GameState.WrongActionMustBeat)
+                    throw new Exception("Wrong action provided");
+                if (result == CheckersOnlineSPA.CheckersEngine.GameEngine.GameState.WrongActionProvided)
+                    throw new Exception("Wrong action provided");
+                return result;
         }
 
         public static CheckerAction ParsePlayerAction(CheckersEngine.Controller.FakeController playerController, CheckersEngine.GameEngine.Game game, JObject jsonObject)

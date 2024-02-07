@@ -11,6 +11,7 @@ namespace CheckersOnlineSPA.Services.Chat
     public interface IChatRoom
     {
         public int GetRoomID();
+        public Task SendToAnyone(ChatMessages.ChatMessageWrapper message);
         public IChatClient? AcceptClientConnect(GenericWebSocket socket);
         public void HandleClientRequest(IChatClient? client, JObject request);
         public void AddClient(IChatClient chatClient);

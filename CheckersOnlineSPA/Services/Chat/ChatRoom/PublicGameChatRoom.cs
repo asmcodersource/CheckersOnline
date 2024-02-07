@@ -21,6 +21,12 @@ namespace CheckersOnlineSPA.Services.Chat
             ChatRoomRuleABEC = new ChatRoomRuleABEC(this);
         }
 
+        public async Task SendToAnyone(ChatMessages.ChatMessageWrapper message)
+        {
+            foreach(var client in Clients)
+                await client.SendMessage(message);
+        }
+
         public void AddClient(IChatClient chatClient)
         {
             Clients.Add(chatClient);

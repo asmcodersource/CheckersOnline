@@ -49,15 +49,20 @@ namespace CheckersOnlineSPA.Services
             }
         }
 
-        public async Task SendResponseJson(object obj)
+        public async Task<bool> SendResponseJson(dynamic obj)
         {
             try
             {
-                    var objJson = System.Text.Json.JsonSerializer.Serialize(obj);
+                    var objJson = Newtonsoft.Json.JsonConvert.SerializeObject(obj, Formatting.Indented);
                     var jsonBytes = Encoding.UTF8.GetBytes(objJson);
                     await _socket.SendAsync(jsonBytes, WebSocketMessageType.Text, true, CancellationToken.None);
+                    return true;
             }
-            catch {}
+            catch (WebSocketException exception) {
+                IsListening = false;
+                SocketClosed?.Invoke(this);
+            }
+            return false;
         }
 
         public async Task<JObject> ReceiveMessageAsync(CancellationToken cancellationToken)

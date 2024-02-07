@@ -3,8 +3,6 @@ import { CheckersField } from './GameField/CheckersField';
 import { Chat } from './Chat/Chat';
 import './GameLayout.css';
 
-const ChatClient = require('./ChatClient');
-
 
 export class GameLayout extends Component {
     constructor(props) {
@@ -12,6 +10,7 @@ export class GameLayout extends Component {
 
         this.chatClient = null;
         this.gameWebSocket = null;
+        this.responseHandler = this.responseHandler.bind(this);
         this.tryLoginByStoredToken = this.tryLoginByStoredToken.bind(this);
         this.mouseClicked = this.mouseClicked.bind(this);
         this.state = {
@@ -21,6 +20,7 @@ export class GameLayout extends Component {
             firstClick: null
         }
         this.checkersFieldRef = React.createRef();
+        this.chatRef = React.createRef();
     }
 
 
@@ -30,7 +30,7 @@ export class GameLayout extends Component {
                 <div className="game-layout-wrapper">
                     <div className='menu-field-wrapper'>
                         <CheckersField ref={this.checkersFieldRef} mouseClicked={this.mouseClicked} />
-                        <Chat />
+                        <Chat ref={this.chatRef} />
                     </div>
                 </div>
             </div>
@@ -98,30 +98,12 @@ export class GameLayout extends Component {
 
         let target = 'ws://95.47.167.113:5124';
         this.gameWebSocket = new WebSocket(`${target}/requestgamesocket?token=${token}`);
+        this.responseHandler = this.responseHandler.bind(this);
         this.gameWebSocket.onopen = async (event) => {
             await new Promise(resolve => setTimeout(resolve, 500));
             await this.gameWebSocket.send(JSON.stringify({ type: "connectToRoom" }))
         };
-        this.gameWebSocket.onmessage = (event) => {
-            try {
-                const message = JSON.parse(event.data);
-                if (message["type"] == "connectionEstablished") {
-                    this.chatClient = new ChatClient(token, message["chatId"])
-                } else if (message["type"] == "moveAction") {
-                    let x1 = message["firstPosition"]["column"];
-                    let y1 = message["firstPosition"]["row"];
-                    let x2 = message["secondPosition"]["column"];
-                    let y2 = message["secondPosition"]["row"];
-                    this.checkersFieldRef.current.moveChecker({ cellX: x1, cellY: y1 }, { cellX: x2, cellY: y2 })
-                } else if (message["type"] == "removeAction") {
-                    let x1 = message["removePosition"]["column"];
-                    let y1 = message["removePosition"]["row"];
-                    this.checkersFieldRef.current.removeChecker({ cellX: x1, cellY: y1 })
-                }
-            } catch (err) {
-                console.log(err);
-            }
-        }
+        this.gameWebSocket.onmessage = this.responseHandler;
     }
 
     async tryLoginByStoredToken() {
@@ -141,6 +123,29 @@ export class GameLayout extends Component {
             return true
         } else {
             return false;
+        }
+    }
+
+    async responseHandler(event) {
+        const token = sessionStorage.getItem('token')
+        try {
+            const message = JSON.parse(event.data);
+            if (message["type"] == "connectionEstablished") {
+                console.log(this.chatRef);
+                this.chatRef.current.connectToChatRoom(message["chatId"], token)
+            } else if (message["type"] == "moveAction") {
+                let x1 = message["firstPosition"]["column"];
+                let y1 = message["firstPosition"]["row"];
+                let x2 = message["secondPosition"]["column"];
+                let y2 = message["secondPosition"]["row"];
+                this.checkersFieldRef.current.moveChecker({ cellX: x1, cellY: y1 }, { cellX: x2, cellY: y2 })
+            } else if (message["type"] == "removeAction") {
+                let x1 = message["removePosition"]["column"];
+                let y1 = message["removePosition"]["row"];
+                this.checkersFieldRef.current.removeChecker({ cellX: x1, cellY: y1 })
+            }
+        } catch (err) {
+            console.log(err);
         }
     }
 }

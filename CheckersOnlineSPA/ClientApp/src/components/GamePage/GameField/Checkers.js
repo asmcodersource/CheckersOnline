@@ -13,7 +13,6 @@ export class Checker extends Component {
 
     render() {
         var field = document.querySelector(".checker-field");
-        console.log(field);
 
         const posX = this.props.position.cellX * field.clientWidth / 8;
         const posY = this.props.position.cellY * field.clientHeight / 8;

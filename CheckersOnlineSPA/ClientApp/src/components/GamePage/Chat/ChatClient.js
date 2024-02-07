@@ -3,22 +3,28 @@ class ChatClient {
         let target = 'ws://95.47.167.113:5124';
         this.state = "wait_connection_response";
         this.chat_id = chat_id;
+        this.onmessage = null;
         this.requestChatClientConnection = this.requestChatClientConnection.bind(this);
+        this.handleResponse = this.handleResponse.bind(this);
         this.browserWebSocket = new WebSocket(`${target}/requestChatSocket?token=${user_token}`);
         this.browserWebSocket.onmessage = this.handleResponse;
-        this.browserWebSocket.onopen = () => this.requestChatClientConnection();
+        this.browserWebSocket.onopen = this.requestChatClientConnection;
+        this.browserWebSocket.onclose = function (event) {
+            console.log('Connection closed with code:', event.code);
+        };
     }
 
-    requestChatClientConnection() {
+    async requestChatClientConnection() {
         const request = {
             "type": "connectToChatRoom",
             "chatId": this.chat_id,
         };
         const json = JSON.stringify(request);
-        this.browserWebSocket.send(json);
+        await this.browserWebSocket.send(json);
     }
 
     handleResponse(event) {
+        console.log(event);
         switch (this.state) {
             case "wait_connection_response":
                 this.onChatConnectionResponse(event);
@@ -36,7 +42,8 @@ class ChatClient {
     }
 
     handleChatRoomMessage(event) {
-        console.log(event);
+        const message = JSON.parse(event.data);
+        this.onmessage(message);
     }
 }
 

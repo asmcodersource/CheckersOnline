@@ -7,6 +7,7 @@ using System.Text.Json.Nodes;
 using CheckersOnlineSPA.CheckersEngine.GameEngine;
 using Mysqlx.Resultset;
 using CheckersOnlineSPA.Services.Chat;
+using CheckersOnlineSPA.Services.Chat.ChatMessages;
 
 namespace CheckersOnlineSPA.Services.Games
 {
@@ -119,8 +120,30 @@ namespace CheckersOnlineSPA.Services.Games
             }
         }
 
-        protected void ChangeState(GameState newState) {
+        protected async Task ChangeState(GameState newState)
+        {
             CurrentGameState = newState;
+            ChatInformationalMessage message = new ChatInformationalMessage();
+            switch (newState)
+            {
+                case GameState.BLACK_TURN:
+                    message.Content = "Хід гравця чорних";
+                    break;
+                case GameState.WHITE_TURN:
+                    message.Content = "Хід гравця білих";
+                    break;
+                case GameState.AWAITING_OF_PLAYERS:
+                    message.Content = "Очікування гравців";
+                    break;
+                case GameState.WHITE_WIN:
+                    message.Content = "Гравець білих переміг!";
+                    break;
+                case GameState.BLACK_WIN:
+                    message.Content = "Гравець чорних переміг!";
+                    break;
+            }
+            ChatMessageWrapper messageWrapper = new ChatMessageWrapper(message);
+            await ChatRoom.SendToAnyone(messageWrapper);
         }
     }
 }

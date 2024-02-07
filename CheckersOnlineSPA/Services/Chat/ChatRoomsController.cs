@@ -10,8 +10,8 @@ namespace CheckersOnlineSPA.Services.Chat
 
         public IChatRoom? GetRoomById(int id)
         {
-            if( RoomsDictionary.ContainsKey(id))
-                return RoomsDictionary[i];
+            if (RoomsDictionary.ContainsKey(id))
+                return RoomsDictionary[id];
             return null;
         }
 

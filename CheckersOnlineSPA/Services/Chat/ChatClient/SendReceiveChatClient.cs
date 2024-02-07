@@ -1,4 +1,5 @@
 ﻿using CheckersOnlineSPA.Services.Chat.ChatClient;
+using CheckersOnlineSPA.Services.Chat.ChatMessages;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
@@ -11,7 +12,7 @@ namespace CheckersOnlineSPA.Services.Chat
     {
         public event Action<IChatClient> ClientDisconnected;
         public IChatRoom Room { get; set; }
-        public GenericWebSocket? Socket { get; set; }
+        public GenericWebSocket Socket { get; set; }
 
 
         public SendReceiveChatClient(IChatRoom chatRoom, GenericWebSocket socket)
@@ -19,16 +20,13 @@ namespace CheckersOnlineSPA.Services.Chat
             Room = chatRoom;
             Socket = socket;
             Socket.SocketClosed += ClientSocketCloseHandler;
-            Socket.MessageReceived += ClientRequestHandler; 
+            Socket.MessageReceived += ClientRequestHandler;
         }
 
 
-        public void SendMessage(ChatMessage message)
+        public async Task SendMessage(ChatMessageWrapper message)
         {
-            try
-            {
-                Socket?.SendResponseJson(message);
-            } catch {}
+            await Socket?.SendResponseJson(message); 
         }
 
         protected void ClientRequestHandler(GenericWebSocket socket, JObject request)

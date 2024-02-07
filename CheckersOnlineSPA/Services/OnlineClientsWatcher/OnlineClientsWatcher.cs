@@ -59,7 +59,7 @@ namespace CheckersOnlineSPA.Services.OnlineClientsWatcher
             while (clientOnlines.Count() != 0)
             {
                 var clientActivity = clientOnlines.Peek();
-                var activityTime = clientActivity.Time.AddTicks(ClientOnlineAliveTime.Ticks);
+                var activityTime = clientActivity.Time.AddTicks(ClientOnlineAliveTime.Ticks); // null reference clientActivity
                 if (activityTime < DateTime.UtcNow)
                 {
                     if (tokenCount[clientActivity.ClientToken] > 1)

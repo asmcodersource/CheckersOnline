@@ -17,12 +17,7 @@ namespace CheckersOnlineSPA.Services.Browser
 
         public async Task Invoke(HttpContext context)
         {
-            if (!context.WebSockets.IsWebSocketRequest )
-            {
-                await _next(context);
-                return;
-            }
-            if (context.Request.Path == "/requestbrowsersocket")
+            if (context.WebSockets.IsWebSocketRequest && context.Request.Path == "/requestbrowsersocket")
             {
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 await RegisterWebSocketHandler(context, webSocket);

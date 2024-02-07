@@ -7,7 +7,7 @@
 
         public event Action<IChatClient> ClientDisconnected;
 
-        public void SendMessage(ChatMessage message)
+        public async Task SendMessage(ChatMessages.ChatMessageWrapper message)
         {
             throw new NotImplementedException();
         }

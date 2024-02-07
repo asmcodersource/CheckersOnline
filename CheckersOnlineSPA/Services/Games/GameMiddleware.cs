@@ -18,12 +18,7 @@ namespace CheckersOnlineSPA.Services.Games
 
         public async Task Invoke(HttpContext context)
         {
-            if (!context.WebSockets.IsWebSocketRequest)
-            {
-                await _next(context);
-                return;
-            }
-            if (context.Request.Path == "/requestgamesocket")
+            if (context.WebSockets.IsWebSocketRequest && context.Request.Path == "/requestgamesocket")
             {
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 await RegisterWebSocketHandler(context, webSocket);

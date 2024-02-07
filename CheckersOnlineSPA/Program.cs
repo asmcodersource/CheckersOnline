@@ -56,9 +56,10 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseMiddleware<GameMiddleware>();
-app.UseMiddleware<BrowserMiddleware>();
 app.UseMiddleware<ChatMiddleware>();
-app.UseMiddleware<ClientsCounterMiddleware>();
+app.UseMiddleware<BrowserMiddleware>();
+
+//app.UseMiddleware<ClientsCounterMiddleware>();
 
 
 app.MapPost("/login", Auth.LoginHandler);

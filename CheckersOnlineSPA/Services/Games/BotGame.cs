@@ -1,6 +1,8 @@
 ﻿using CheckersOnlineSPA.CheckersEngine.Controller;
 using CheckersOnlineSPA.CheckersEngine.GameEngine;
 using CheckersOnlineSPA.Services.Chat;
+using CheckersOnlineSPA.Services.Chat.ChatMessages;
+using CheckersOnlineSPA.Services.Chat.ChatMessages;
 using Newtonsoft.Json.Linq;
 using System.Security.Claims;
 
@@ -79,7 +81,7 @@ namespace CheckersOnlineSPA.Services.Games
             this.ChatRoom = room;
         }
 
-        protected async void ProcessPlayerAction(GenericWebSocket socket, JObject jsonObject)
+        protected async Task ProcessPlayerAction(GenericWebSocket socket, JObject jsonObject)
         {
             if (CurrentGameState != GameState.BLACK_TURN && CurrentGameState != GameState.WHITE_TURN)
                 return;
@@ -110,9 +112,30 @@ namespace CheckersOnlineSPA.Services.Games
             await PerformBotAction();
         }
 
-        protected void ChangeState(GameState newState)
+        protected async Task ChangeState(GameState newState)
         {
             CurrentGameState = newState;
+            ChatInformationalMessage message = new ChatInformationalMessage();
+            switch (newState)
+            {
+                case GameState.BLACK_TURN:
+                    message.Content = "Хід гравця чорних";
+                    break;
+                case GameState.WHITE_TURN:
+                    message.Content = "Хід гравця білих";
+                    break;
+                case GameState.AWAITING_OF_PLAYERS:
+                    message.Content = "Очікування гравців";
+                    break;
+                case GameState.WHITE_WIN:
+                    message.Content = "Гравець білих переміг!";
+                    break;
+                case GameState.BLACK_WIN:
+                    message.Content = "Гравець чорних переміг!";
+                    break;
+            }
+            ChatMessageWrapper messageWrapper = new ChatMessageWrapper(message);
+            await ChatRoom.SendToAnyone(messageWrapper);
         }
     }
 }

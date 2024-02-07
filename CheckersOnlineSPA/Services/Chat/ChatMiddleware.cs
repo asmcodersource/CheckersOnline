@@ -1,4 +1,6 @@
-﻿namespace CheckersOnlineSPA.Services.Chat
+﻿using System.Net.Sockets;
+
+namespace CheckersOnlineSPA.Services.Chat
 {
     public class ChatMiddleware
     {
@@ -13,16 +15,12 @@
 
         public async Task Invoke(HttpContext context)
         {
-            if (!context.WebSockets.IsWebSocketRequest)
-            {
-                await Next(context);
-                return;
-            }
-            if (context.Request.Path == "/requestChatSocket")
+            if (context.WebSockets.IsWebSocketRequest && context.Request.Path == "/requestChatSocket")
             {
                 var webSocket = await context.WebSockets.AcceptWebSocketAsync();
                 var genericWebSocket = new GenericWebSocket(context, webSocket);
-                HandleChatRequest(context, genericWebSocket);
+                await HandleChatRequest(context, genericWebSocket);
+                await genericWebSocket.Handle();
             }
             else
             {
@@ -35,7 +33,7 @@
         public async Task HandleChatRequest(HttpContext context, GenericWebSocket socket)
         {
             CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            cancellationTokenSource.CancelAfter(5000); // max 5000ms for this communication
+
             var message = await socket.ReceiveMessageAsync(cancellationTokenSource.Token);
             if ( message == null || message.ContainsKey("type") == false || message["type"].ToString() != "connectToChatRoom")
                 return;

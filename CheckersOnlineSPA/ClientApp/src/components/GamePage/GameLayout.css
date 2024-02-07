@@ -10,7 +10,7 @@
 
 .game-layout {
     width: 100%;
-    height: 90vh;
+    height: 100vh;
     display: flex;
     flex-direction: row;
     justify-content: center;
@@ -31,18 +31,22 @@
 
 @media (max-width: 600px) {
     body {
-        height: 101vh;
+        max-height: 100vh;
+        max-width: 100vw;
     }
     
     .game-layout-wrapper {
         display: flex;
         flex-direction: column;
         justify-content: normal;
-        align-items:normal;
+        align-items: stretch;
+        max-width: 100vw;
     }
 
     .menu-field-wrapper {
         flex-direction: column;
-        align-items:flex-start;
+        max-width: 100vw;
+        align-items: stretch;
+        height: 105vh;
     }
 }
