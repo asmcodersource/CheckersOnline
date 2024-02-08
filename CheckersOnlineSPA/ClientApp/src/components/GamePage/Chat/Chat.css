@@ -2,12 +2,19 @@
     max-width: 100%;
     box-sizing: content-box;
     background-color: #333333;
-    box-shadow: inset 0px 0px 15px 5px rgb(0,0,0,0.25);
-    border: 1.5px solid #555555;
+    box-shadow: inset 0px 0px 15px 5px rgb(0,0,0,0.1);
+    border-top: 1px solid #555555;
     display: flex;
     flex-direction: column;
     flex-grow: 1;
     height: auto;
+    overflow: hidden;
+}
+
+@media (min-width: 600px) {
+    .chat-wrapper{
+        min-width: 300px
+    }
 }
 
 .chat-header {
@@ -31,6 +38,7 @@
     flex-direction: column;
     padding: 3px;
     height: auto;
+    overflow-y: scroll;
 }
 
 .chat-inputwrapper {
@@ -47,7 +55,7 @@
     border-radius: 0px;
     border: 0px solid black;
     margin: 0px;
-    padding: 12px 10px;
+    padding: 6px 10px;
     font-size: 12pt;
     background: rgba(0,0,0,0.100);
     color: #EEEEEE;
@@ -61,18 +69,24 @@ input:focus {
 }
 
 .message-wrapper {
-    padding: 8px 20px;
+    font-size: 11pt;
+    padding: 5px 20px;
     text-align: justify;
-    text-shadow: -1px 2px 2px black;
+    text-shadow: -2px 2px 0px black;
     line-height: 1.2;
 }
 
-.message-wrapper .username {
-    color: #CDFEFD;
-    font-weight: 550;
-    text-shadow: -1px 2px 2px black;
+    .message-wrapper .username {
+        color: #f0c33e;
+        font-weight: 550;
+    }
+
+.informational-message {
+    color: #bdbcbb;
+    font-weight: 600;
 }
 
-.message-content {
-    color: #EEEEEE;
+.client-message {
+    color: #d4d2cd;
+    font-weight: 600;
 }

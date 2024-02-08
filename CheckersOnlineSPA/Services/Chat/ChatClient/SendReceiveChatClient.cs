@@ -2,6 +2,7 @@
 using CheckersOnlineSPA.Services.Chat.ChatMessages;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Security.Claims;
 
 namespace CheckersOnlineSPA.Services.Chat
 {
@@ -11,6 +12,7 @@ namespace CheckersOnlineSPA.Services.Chat
     public class SendReceiveChatClient: IChatClient
     {
         public event Action<IChatClient> ClientDisconnected;
+        public string Nickname { get; set; }
         public IChatRoom Room { get; set; }
         public GenericWebSocket Socket { get; set; }
 
@@ -21,6 +23,7 @@ namespace CheckersOnlineSPA.Services.Chat
             Socket = socket;
             Socket.SocketClosed += ClientSocketCloseHandler;
             Socket.MessageReceived += ClientRequestHandler;
+            Nickname = socket.User.Claims.First((claim) => claim.Type == ClaimTypes.Name).Value;
         }
 
 
@@ -34,7 +37,6 @@ namespace CheckersOnlineSPA.Services.Chat
             if (request.ContainsKey("type") == false)
                 return;
 
-            // TODO: create ChatMessage from request, or handle it another way
             switch (request["type"].ToString())
             {
                 case "clientSide":

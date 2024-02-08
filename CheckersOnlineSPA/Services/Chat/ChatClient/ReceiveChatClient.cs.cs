@@ -6,6 +6,7 @@
         public GenericWebSocket Socket { get => throw new NotImplementedException(); set => throw new NotImplementedException(); }
 
         public event Action<IChatClient> ClientDisconnected;
+        public string Nickname { get; set; }
 
         public async Task SendMessage(ChatMessages.ChatMessageWrapper message)
         {

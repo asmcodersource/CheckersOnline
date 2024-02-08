@@ -9,6 +9,7 @@ namespace CheckersOnlineSPA.Services.Chat.ChatClient
     public interface IChatClient
     {
         public event Action<IChatClient> ClientDisconnected;
+        public string Nickname { get; set; }
         public Chat.IChatRoom Room { get; set; }
         public GenericWebSocket Socket { get; set; }
         public Task SendMessage(ChatMessages.ChatMessageWrapper message);

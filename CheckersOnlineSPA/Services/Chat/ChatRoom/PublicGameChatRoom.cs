@@ -2,6 +2,7 @@
 using CheckersOnlineSPA.Services.Chat.ChatClient;
 using CheckersOnlineSPA.Services.Chat.ChatRoomAcceptRules;
 using CheckersOnlineSPA.Services.Chat.ChatRoom;
+using CheckersOnlineSPA.Services.Chat.ChatMessages;
 
 namespace CheckersOnlineSPA.Services.Chat
 {
@@ -50,7 +51,14 @@ namespace CheckersOnlineSPA.Services.Chat
 
         public void HandleClientRequest(IChatClient? client, JObject request)
         {
-
+            switch (request["action"].ToString())
+            {
+                case "broadcastMessage":
+                    var chatClientMessage = new ChatClientMessage(client, request["content"]["message"].ToString());
+                    var chatMessage = new ChatMessages.ChatMessageWrapper(chatClientMessage);
+                    SendToAnyone(chatMessage);
+                    break;
+            }
         }
 
         public int GetRoomID()

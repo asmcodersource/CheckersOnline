@@ -24,13 +24,14 @@ class ChatClient {
     }
 
     handleResponse(event) {
-        console.log(event);
         switch (this.state) {
             case "wait_connection_response":
                 this.onChatConnectionResponse(event);
                 break;
             case "connection_established":
                 this.handleChatRoomMessage(event);
+                break;
+            default:
                 break;
         }
     }
@@ -44,6 +45,11 @@ class ChatClient {
     handleChatRoomMessage(event) {
         const message = JSON.parse(event.data);
         this.onmessage(message);
+    }
+
+    async sendMessage(message) {
+        let json = JSON.stringify(message);
+        await this.browserWebSocket.send(json);
     }
 }
 

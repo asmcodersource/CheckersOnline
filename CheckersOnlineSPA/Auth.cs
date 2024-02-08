@@ -49,7 +49,11 @@ namespace CheckersOnlineSPA.ClientApp
 
         private static async Task AuthorizeClient(HttpContext context, User user)
         {
-            var claims = new List<Claim> { new Claim(ClaimTypes.Email, user.Email), new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) };
+            var claims = new List<Claim> { 
+                new Claim(ClaimTypes.Email, user.Email), 
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                new Claim(ClaimTypes.Name, user.UserName.ToString()),
+            };
             var jwt = new JwtSecurityToken(
                     issuer: AuthOptions.ISSUER,
                     audience: AuthOptions.AUDIENCE,
@@ -90,7 +94,11 @@ namespace CheckersOnlineSPA.ClientApp
                     var preparedPassword = PreparePassword(password);
                     User user = new User() { Email = email, Password = preparedPassword, UserName = username };
                     db.Add<User>(user);
-                    var claims = new List<Claim> { new Claim(ClaimTypes.Email, user.Email), new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()) };
+                    var claims = new List<Claim> { 
+                        new Claim(ClaimTypes.Email, user.Email), 
+                        new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                        new Claim(ClaimTypes.Name, user.UserName)
+                    };
                     var jwt = new JwtSecurityToken(
                             issuer: AuthOptions.ISSUER,
                             audience: AuthOptions.AUDIENCE,

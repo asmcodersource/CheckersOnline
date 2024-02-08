@@ -43,9 +43,10 @@ export class CheckersField extends Component {
         const fieldRect = event.currentTarget.getBoundingClientRect();
         const mouseX = event.clientX - fieldRect.left;
         const mouseY = event.clientY - fieldRect.top;
-        const cellSize = fieldRect.width / 8;
-        const column = Math.floor(mouseX / cellSize);
-        const row = Math.floor(mouseY / cellSize);
+        const cellXSize = fieldRect.width / 8;
+        const cellYSize = fieldRect.height / 8;
+        const column = Math.floor(mouseX / cellXSize);
+        const row = Math.floor(mouseY / cellYSize);
         this.props.mouseClicked(row, column);
     }
 

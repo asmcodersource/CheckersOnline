@@ -16,6 +16,8 @@
 @media (max-width: 600px) {
     .checker-field {
         width: 100vw;
+        height: 45vh;
+        max-height: 350px;
     }
 }
 

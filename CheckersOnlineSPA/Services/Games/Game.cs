@@ -35,6 +35,8 @@ namespace CheckersOnlineSPA.Services.Games
             int y1 = Convert.ToInt32(jsonObject["firstPosition"]["row"]);
             int x2 = Convert.ToInt32(jsonObject["secondPosition"]["column"]);
             int y2 = Convert.ToInt32(jsonObject["secondPosition"]["row"]);
+            if (Math.Abs(x1 - x2) != Math.Abs(y1 - y2))
+                throw new Exception("Non diagonal movement");
             return playerController.GetActionByMove(game, x1, y1, x2, y2);
         }
 
