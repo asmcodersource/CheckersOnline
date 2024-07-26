@@ -3,7 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CheckersOnlineSPA", "CheckersOnlineSPA\CheckersOnlineSPA.csproj", "{C5CD2F30-8F67-4A05-9130-064FE82792A3}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "server", "CheckersOnlineSPA\server.csproj", "{C5CD2F30-8F67-4A05-9130-064FE82792A3}"
+EndProject
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "client", "client\client.esproj", "{2C9D8E10-D346-4EFF-A7B8-0C2E01A0A560}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,12 @@ Global
 		{C5CD2F30-8F67-4A05-9130-064FE82792A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C5CD2F30-8F67-4A05-9130-064FE82792A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C5CD2F30-8F67-4A05-9130-064FE82792A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C9D8E10-D346-4EFF-A7B8-0C2E01A0A560}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2C9D8E10-D346-4EFF-A7B8-0C2E01A0A560}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2C9D8E10-D346-4EFF-A7B8-0C2E01A0A560}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{2C9D8E10-D346-4EFF-A7B8-0C2E01A0A560}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2C9D8E10-D346-4EFF-A7B8-0C2E01A0A560}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2C9D8E10-D346-4EFF-A7B8-0C2E01A0A560}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -44,7 +44,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-string conn = "Server=192.168.0.101;Database=checkers;Uid=dimon;Pwd=qwerty123123;";
+string conn = "Server=localhost;Database=CheckersOnline;Uid=admin;Pwd=123123;";
 builder.Services.AddDbContext<DatabaseContext>(options => options.UseMySql(conn, ServerVersion.AutoDetect(conn)));
 
 var app = builder.Build();
