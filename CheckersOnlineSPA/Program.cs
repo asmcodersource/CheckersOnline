@@ -26,7 +26,7 @@ builder.Services.AddDataProtection();
 builder.Services.AddControllersWithViews();
 builder.Services.AddAuthorization();
 builder.Services.AddSingleton<BrowserController>();
-builder.Services.AddSingleton<OnlineClientsWatcher>();
+//builder.Services.AddSingleton<OnlineClientsWatcher>();
 builder.Services.AddSingleton<GamesController>();
 builder.Services.AddSingleton<ChatRoomsController>();
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -58,7 +58,6 @@ app.UseAuthorization();
 app.UseMiddleware<GameMiddleware>();
 app.UseMiddleware<ChatMiddleware>();
 app.UseMiddleware<BrowserMiddleware>();
-
 //app.UseMiddleware<ClientsCounterMiddleware>();
 
 

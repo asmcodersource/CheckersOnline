@@ -96,7 +96,8 @@ export default class Main extends Component {
             this.browserWebsocket.close();
 
 
-        let target = 'ws://95.47.167.113:5124';
+
+        let target = '';
         this.browserWebsocket = new WebSocket(`${target}/requestbrowsersocket?token=${token}`);
         this.browserWebsocket.onopen = async (event) => {
             await new Promise(resolve => setTimeout(resolve, 500));
@@ -121,8 +122,11 @@ export default class Main extends Component {
                     this.setState({ games: rooms });
                 } else if (message["type"] === "claimRoom") {
                     var state = message["state"];
-                    if (state === "roomClaimed")
-                        window.location.replace("/gameroom");
+                    if (state === "roomClaimed") {
+                        setTimeout(() => {
+                            window.location.replace("/gameroom");
+                        }, 1000);
+                    }
                 }
             } catch (err) {
                 console.log(err);

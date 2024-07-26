@@ -70,7 +70,7 @@ namespace CheckersOnlineSPA.Services.Games
             if (HumanPlayerEmail == email)
             {
                 HumanPlayerSocket = null;
-                GamesController.CloseGameRoom(this);
+                //GamesController.CloseGameRoom(this);
             }
         }
 

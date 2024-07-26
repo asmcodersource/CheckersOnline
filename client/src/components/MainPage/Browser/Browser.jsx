@@ -12,7 +12,7 @@ export class Browser extends Component {
         }
 
         this.requestSiteStatistic = this.requestSiteStatistic.bind(this);
-        this.interval = setInterval(this.requestSiteStatistic, 5000);
+        //this.interval = setInterval(this.requestSiteStatistic, 5000);
         this.ws = null;
     }
 
@@ -41,7 +41,7 @@ export class Browser extends Component {
     }
 
     initHeartbeatConnect() {
-        this.ws = new WebSocket("ws://localhost:5124/ws");
+        this.ws = new WebSocket("wss://localhost:5124/ws");
     }
 
     async requestSiteStatistic() {

@@ -1,6 +1,6 @@
 export default class ChatClient {
     constructor(user_token, chat_id) {
-        let target = 'ws://95.47.167.113:5124';
+        let target = '';
         this.state = "wait_connection_response";
         this.chat_id = chat_id;
         this.onmessage = null;
@@ -15,6 +15,7 @@ export default class ChatClient {
     }
 
     async requestChatClientConnection() {
+        console.log("chat oppened");
         const request = {
             "type": "connectToChatRoom",
             "chatId": this.chat_id,

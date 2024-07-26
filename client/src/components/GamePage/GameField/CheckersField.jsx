@@ -40,6 +40,7 @@ export class CheckersField extends Component {
 
 
     mouseClickEvent(event) {
+        console.log('clicked');
         const fieldRect = event.currentTarget.getBoundingClientRect();
         const mouseX = event.clientX - fieldRect.left;
         const mouseY = event.clientY - fieldRect.top;
@@ -66,6 +67,7 @@ export class CheckersField extends Component {
     }
 
     moveChecker(currentPosition, newPosition) {
+        console.log(currentPosition, newPosition);
         this.setState(prevState => {
             const updatedCheckers = prevState.checkers.map(checker => {
                 if (checker.position.cellX == currentPosition.cellX && checker.position.cellY == currentPosition.cellY) {

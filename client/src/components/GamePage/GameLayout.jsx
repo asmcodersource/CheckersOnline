@@ -63,7 +63,7 @@ export default class GameLayout extends Component {
             let firstClickValues = this.state.firstClick;
             this.setState({ firstClick: null });
             let secondClickValues = { row, column };
-
+            console.log('move checker');
             let jsonObject = JSON.stringify({
                 "type": "makeAction",
                 "firstPosition": firstClickValues,
@@ -75,6 +75,7 @@ export default class GameLayout extends Component {
     }
 
     async componentDidMount() {
+        console.log('component did mount!');
         var scrollDiv = document.getElementById("gameField").offsetTop;
         window.scrollTo({ top: scrollDiv, behavior: 'smooth' });
         this.initializeField();
@@ -96,7 +97,7 @@ export default class GameLayout extends Component {
             this.gameWebSocket.close();
 
 
-        let target = 'ws://95.47.167.113:5124';
+        let target = '';
         this.gameWebSocket = new WebSocket(`${target}/requestgamesocket?token=${token}`);
         this.responseHandler = this.responseHandler.bind(this);
         this.gameWebSocket.onopen = async (event) => {
